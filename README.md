@@ -1,7 +1,6 @@
 # 🛒 GreenCart - Modern E-Commerce Grocery Platform
 
 [![MERN Stack](https://img.shields.io/badge/Stack-MERN-green.svg)](https://reactjs.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Author](https://img.shields.io/badge/Author-Sameer%20Baral-blue.svg)](https://github.com/SameerBaral)
 
 **GreenCart** is a full-featured, responsive, full-stack grocery shopping application built using the **MERN (MongoDB, Express, React, Node.js)** stack. It offers an intuitive online shopping experience for users along with an integrated Seller Dashboard for inventory management, real-time product updates, and order fulfillment.
@@ -119,12 +118,6 @@ greencart-grocery-mern-website/
 4. **Run Locally**
    - **Backend**: `cd server && npm run dev` (Runs on `http://localhost:4000`)
    - **Frontend**: `cd client && npm run dev` (Runs on `http://localhost:5173`)
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
