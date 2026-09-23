@@ -1,118 +1,136 @@
-# 🛒 GreenCart – E-Commerce Grocery Store
+# 🛒 GreenCart - Modern E-Commerce Grocery Platform
 
- **GreenCart** is a modern full-stack grocery store application built with the **MERN stack**, featuring a user-friendly UI, an admin dashboard, category filtering, cart management, and two payment options: **online via Stripe** and **cash on delivery**.
+[![MERN Stack](https://img.shields.io/badge/Stack-MERN-green.svg)](https://reactjs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-Sameer%20Baral-blue.svg)](https://github.com/SameerBaral)
 
-🌐 **Live site**: [https://greencart-grocery-mern-website.vercel.app/](https://greencart-grocery-mern-website.vercel.app/)  
-📦 **GitHub repository**: [https://github.com/YoJu310/greencart-grocery-mern-website](https://github.com/YoJu310/greencart-grocery-mern-website)
+**GreenCart** is a full-featured, responsive, full-stack grocery shopping application built using the **MERN (MongoDB, Express, React, Node.js)** stack. It offers an intuitive online shopping experience for users along with an integrated Seller Dashboard for inventory management, real-time product updates, and order fulfillment.
 
 ---
 
-## 🚀 Features
+## ✨ Key Features
 
-- 🔐 User registration and login with JWT authentication
-- 🛍️ Browse and filter products by category
-- 🔍 Product search functionality
-- 🛒 Add/remove items from the cart
-- 📦 Place orders and View order summary
-- 🗃 View past orders in "My Orders"
-- 💳 Two payment methods: **Stripe** (online) or **Cash on Delivery**
-- 📦 Seller dashboard for order and product management (WIP/future scope)
-- ☁️ Image upload with **Cloudinary**
+### 👤 User Features
+- 🔐 **Authentication & Authorization**: Secure signup, login, and JWT token-based auth state persistence.
+- 🛍️ **Dynamic Product Catalog**: Browse groceries across multiple categories (Fruits, Vegetables, Dairy, Bakery, Beverages, Snacks).
+- 🔍 **Real-time Search & Filtering**: Instantly search items or filter products by specific categories.
+- 🛒 **Cart Management**: Add items, update quantities, dynamic tax and total calculations, and seamless cart state synchronization.
+- 📍 **Address Book**: Save and manage delivery addresses.
+- 💳 **Multiple Payment Options**:
+  - **Online Payment**: Integrated with **Stripe Checkout** (Instant session verification).
+  - **Cash on Delivery (COD)**: Quick one-click order placement.
+- 📦 **Order Tracking**: View order history, status updates, total amounts, and item details under "My Orders".
 
+### 🏪 Seller / Admin Dashboard
+- 📊 **Dashboard Overview**: Access seller portal with dedicated auth credentials.
+- ➕ **Product Management**: Add new products with image uploading via **Cloudinary**, category tags, and pricing.
+- 📋 **Order Management**: Monitor customer orders, payment status (Paid / Pending), delivery details, and order progress.
 
-## 🛠️ Tech Stack
+---
 
-- **Frontend**: React, Tailwind CSS, Axios, React Router DOM  
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB
-- **Image Storage**: Cloudinary
-- **Payment gateway**: Stripe API (with webhook support)
-- **Security**: bcrypt (password encryption)
-- **Deployment**: Vercel (frontend), Render/Local (backend) 
+## 🛠️ Tech Stack & Architecture
 
+### **Frontend**
+- **Framework**: React 18 (Vite)
+- **Styling**: Tailwind CSS
+- **Routing**: React Router DOM (v6)
+- **Icons & Assets**: Custom SVG assets & React Hot Toast for UI notifications
+- **HTTP Client**: Axios (with global interceptors & credentials)
 
-## ⚙️ Setup Instructions
+### **Backend**
+- **Runtime**: Node.js & Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JSON Web Tokens (JWT) & bcrypt Password Hashing
+- **Cloud Media Storage**: Cloudinary SDK (for product images)
+- **Payment Processing**: Stripe Node SDK (Checkout Sessions & Verification)
+
+---
+
+## 📁 Folder Structure
+
+```text
+greencart-grocery-mern-website/
+├── client/                 # Frontend React Application
+│   ├── public/             # Static Assets
+│   └── src/
+│       ├── assets/         # App icons, banners, and default product images
+│       ├── components/     # UI Components (Navbar, Footer, Modals, Banners)
+│       ├── context/        # AppContext for global state management
+│       ├── pages/          # Application Pages (Home, Cart, MyOrders, Admin/Seller)
+│       ├── App.jsx         # Routes setup
+│       └── main.jsx        # Entry point
+│
+└── server/                 # Backend Node.js Express API
+    ├── configs/            # Database (MongoDB) & Cloudinary setup
+    ├── controllers/        # Business logic handlers (User, Product, Cart, Order)
+    ├── middlewares/        # JWT Authentication middlewares (User & Seller)
+    ├── models/             # Mongoose schemas (User, Product, Order, Address)
+    ├── routes/             # Express API routes
+    └── server.js           # Main Express server file
+```
+
+---
+
+## 🚀 Quick Start & Setup
 
 ### Prerequisites
-
-Make sure you have the following installed:
-
-- Node.js (v14.x or above)
-- MongoDB (local instance or Atlas)
-- Cloudinary account for image storage
+- [Node.js](https://nodejs.org/) (v16 or above)
+- [MongoDB](https://www.mongodb.com/) (Local or MongoDB Atlas Cluster)
+- [Cloudinary Account](https://cloudinary.com/) (For product image management)
+- [Stripe Account](https://stripe.com/) (For test/live payment processing)
 
 ### Installation
 
-1. Clone the repository:
-
+1. **Clone the Repository**
    ```bash
-   git clone https://github.com/YoJu310/greencart-grocery-mern-website.git
-   cd greencart-grocery-mern-website
+   git clone https://github.com/SameerBaral/Greencart-Grocery-Delivery-Website.git
+   cd Greencart-Grocery-Delivery-Website
    ```
 
-2. Install dependencies for both frontend and backend:
-
+2. **Frontend Setup**
    ```bash
    cd client
    npm install
+   ```
+   Create a `.env` file inside `client/`:
+   ```env
+   VITE_CURRENCY = "₹"
+   VITE_BACKEND_URL = "http://localhost:4000"
+   ```
 
+3. **Backend Setup**
+   ```bash
    cd ../server
    npm install
    ```
-
-3. Set up environment variables:
-
-   Create a `.env` file in the `/client` directory and include the following:
-
+   Create a `.env` file inside `server/`:
    ```env
-   VITE_CURRENCY = '$'
-   VITE_BACKEND_URL = "http://localhost:4000"
-   ```
-   
-   Create a `.env` file in the `/server` directory and include the following:
-
-   ```env
-   PORT=4000
-    MONGO_URI=your_mongodb_connection_string
-    JWT_SECRET=your_jwt_secret_key
-    NODE_ENV=development
-    CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-    CLOUDINARY_API_KEY=your_cloudinary_api_key
-    CLOUDINARY_API_SECRET=your_cloudinary_secret
-    STRIPE_PUBLISHABLE_KEY=your_stripe_publishabe_key
-    STRIPE_SECRET_KEY=your_stripe_secret_key
-    STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-    SELLER_EMAIL = seller@example.com
-    SELLER_PASSWORD = seller12345 
+   PORT = 4000
+   MONGO_URI = your_mongodb_connection_string
+   JWT_SECRET = your_jwt_secret_key
+   CLOUDINARY_CLOUD_NAME = your_cloudinary_cloud_name
+   CLOUDINARY_API_KEY = your_cloudinary_api_key
+   CLOUDINARY_API_SECRET = your_cloudinary_api_secret
+   STRIPE_SECRET_KEY = your_stripe_secret_key
+   SELLER_EMAIL = seller@example.com
+   SELLER_PASSWORD = seller12345
    ```
 
-4. Start the development servers:
+4. **Run Locally**
+   - **Backend**: `cd server && npm run dev` (Runs on `http://localhost:4000`)
+   - **Frontend**: `cd client && npm run dev` (Runs on `http://localhost:5173`)
 
-   ```bash
-   # Start the backend server
-   cd backend
-   npm run dev
+---
 
-   # Start the frontend server
-   cd client
-   npm run dev
-   ```
+## 📝 License
 
-5. Open your browser and visit `http://localhost:5173` to view the app.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+---
 
- ### 🧪 Testing Stripe Payments
-- You must use a Stripe Business Account (India) and configure your keys properly.
-- Use Stripe test card: 4242 4242 4242 4242 – Any future expiry date, any CVC.
+## 👤 Author
 
- 
-## Contributions
+Developed with ❤️ by **[Sameer Baral](https://github.com/SameerBaral)**
 
-Feel free to fork this repository and submit pull requests. All contributions are welcome!
-
-
-## 👩‍💻 Author
-
-Made with ❤️ by [Yojna Singh](https://github.com/YoJu310) 
-
-
+- GitHub: [@SameerBaral](https://github.com/SameerBaral)
+- LinkedIn: [Sameer Baral](https://linkedin.com/in/sameerbaral)
