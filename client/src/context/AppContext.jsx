@@ -5,7 +5,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || "https://greencart-backend-rd1m.onrender.com";
+const defaultBackendUrl = typeof window !== 'undefined' && window.location.hostname.includes("vercel.app") ? "" : "https://greencart-backend-rd1m.onrender.com";
+axios.defaults.baseURL = (import.meta.env.VITE_BACKEND_URL !== undefined && import.meta.env.VITE_BACKEND_URL !== "") ? import.meta.env.VITE_BACKEND_URL : defaultBackendUrl;
 
 // Request interceptor to attach token on every outgoing request
 axios.interceptors.request.use((config) => {
