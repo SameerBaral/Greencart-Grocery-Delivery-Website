@@ -4,7 +4,7 @@ import { assets, dummyAddress } from "../assets/assets";
 import toast from "react-hot-toast";
 
 const Cart = () => {
-    const {products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, axios, user, setCartItems} = useAppContext()
+    const {products, currency, cartItems, removeFromCart, getCartCount, updateCartItem, navigate, getCartAmount, axios, user, setCartItems, setShowUserLogin} = useAppContext()
     const [cartArray, setCartArray] = useState([])
     const [addresses, setAddresses] = useState([])
     const [showAddress, setShowAddress] = useState(false)
@@ -15,8 +15,10 @@ const Cart = () => {
         let tempArray = []
         for(const key in cartItems){
             const product = products.find((item)=>item._id === key)
-            product.quantity = cartItems[key]
-            tempArray.push(product)
+            if (product) {
+                product.quantity = cartItems[key]
+                tempArray.push(product)
+            }
         }
         setCartArray(tempArray)
     }
@@ -40,6 +42,10 @@ const Cart = () => {
 
     const placeOrder = async ()=>{
         try {
+            if(!user){
+                setShowUserLogin(true)
+                return toast.error("Please login to place order")
+            }
             if(!selectedAddress){
                 return toast.error("Please select an address")
             }
@@ -153,13 +159,21 @@ const Cart = () => {
                             Change
                         </button>
                         {showAddress && (
-                            <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full">
+                            <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full z-20">
                                {addresses.map((address, index)=>(
-                                <p onClick={() => {setSelectedAddress(address); setShowAddress(false)}} className="text-gray-500 p-2 hover:bg-gray-100">
+                                <p key={index} onClick={() => {setSelectedAddress(address); setShowAddress(false)}} className="text-gray-500 p-2 hover:bg-gray-100 cursor-pointer">
                                     {address.street}, {address.city}, {address.state}, {address.country}
                                 </p>
                             )) }
-                                <p onClick={() => navigate("/add-address")} className="text-primary text-center cursor-pointer p-2 hover:bg-primary/10">
+                                <p onClick={() => {
+                                    setShowAddress(false);
+                                    if(!user){
+                                        setShowUserLogin(true);
+                                        toast.error("Please login to add address");
+                                    } else {
+                                        navigate("/add-address");
+                                    }
+                                }} className="text-primary text-center cursor-pointer p-2 hover:bg-primary/10">
                                     Add address
                                 </p>
                             </div>
