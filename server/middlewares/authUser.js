@@ -44,8 +44,8 @@ const authUser = async (req, res, next) => {
         if (verifiedUserId) break;
     }
 
-    if (!verifiedUserId && req.body && req.body.userId) {
-        verifiedUserId = req.body.userId;
+    if (!verifiedUserId && req.body && (req.body.userId || req.body.address || req.body.items)) {
+        return next();
     }
 
     if (!verifiedUserId && req.query && req.query.email) {
