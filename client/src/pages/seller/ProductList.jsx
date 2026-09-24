@@ -3,7 +3,7 @@ import { useAppContext } from '../../context/AppContext'
 import toast from 'react-hot-toast'
 
 const ProductList = () => {
-    const {products, currency, axios, fetchProducts} = useAppContext()
+    const {products, currency, axios, fetchProducts, navigate} = useAppContext()
 
     const toggleStock = async (id, inStock)=>{
         try {
@@ -30,16 +30,20 @@ const ProductList = () => {
                                 <th className="px-4 py-3 font-semibold truncate">Category</th>
                                 <th className="px-4 py-3 font-semibold truncate hidden md:block">Selling Price</th>
                                 <th className="px-4 py-3 font-semibold truncate">In Stock</th>
+                                <th className="px-4 py-3 font-semibold truncate text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody className="text-sm text-gray-500">
                             {products.map((product) => (
-                                <tr key={product._id} className="border-t border-gray-500/20">
-                                    <td className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate">
-                                        <div className="border border-gray-300 rounded p-2">
-                                            <img src={Array.isArray(product.image) ? product.image[0] : (product.image || '')} alt="Product" className="w-16" />
+                                <tr key={product._id} className="border-t border-gray-500/20 hover:bg-gray-50/50 transition">
+                                    <td 
+                                        onClick={() => navigate(`/seller/update-product/${product._id}`)}
+                                        className="md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate cursor-pointer group"
+                                    >
+                                        <div className="border border-gray-300 rounded p-2 group-hover:border-primary transition">
+                                            <img src={Array.isArray(product.image) ? product.image[0] : (product.image || '')} alt="Product" className="w-16 h-16 object-cover" />
                                         </div>
-                                        <span className="truncate max-sm:hidden w-full">{product.name}</span>
+                                        <span className="truncate max-sm:hidden w-full font-medium text-gray-800 group-hover:text-primary transition">{product.name}</span>
                                     </td>
                                     <td className="px-4 py-3">{product.category}</td>
                                     <td className="px-4 py-3 max-sm:hidden">{currency}{product.offerPrice}</td>
@@ -49,6 +53,14 @@ const ProductList = () => {
                                             <div className="w-12 h-7 bg-slate-300 rounded-full peer peer-checked:bg-blue-600 transition-colors duration-200"></div>
                                             <span className="dot absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition-transform duration-200 ease-in-out peer-checked:translate-x-5"></span>
                                         </label>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                        <button 
+                                            onClick={() => navigate(`/seller/update-product/${product._id}`)}
+                                            className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white rounded text-xs font-medium cursor-pointer transition shadow-xs"
+                                        >
+                                            Edit / Update
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

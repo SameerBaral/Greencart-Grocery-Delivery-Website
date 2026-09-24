@@ -39,8 +39,11 @@ export const productList = async (req, res)=>{
 // Get single Product : /api/product/id
 export const productById = async (req, res)=>{
     try {
-        const { id } = req.body
+        const id = req.body?.id || req.query?.id
         const product = await Product.findById(id)
+        if (!product) {
+            return res.json({ success: false, message: "Product not found" })
+        }
         res.json({success: true, product})
     } catch (error) {
         console.log(error.message);
@@ -59,3 +62,55 @@ export const changeStock = async (req, res)=>{
         res.json({ success: false, message: error.message })
     }
 }
+
+// Update Product : /api/product/update
+export const updateProduct = async (req, res)=>{
+    try {
+        let productData = JSON.parse(req.body.productData)
+        const { id, name, description, category, price, offerPrice, existingImages, imageIndexes } = productData
+
+        const files = req.files || []
+        
+        let finalImages = Array.isArray(existingImages) ? [...existingImages] : []
+        
+        if (files.length > 0) {
+            const fileUploadPromises = files.map(async (file) => {
+                let result = await cloudinary.uploader.upload(file.path, { resource_type: 'image' });
+                return result.secure_url;
+            });
+            const uploadedUrls = await Promise.all(fileUploadPromises);
+            
+            if (imageIndexes && Array.isArray(imageIndexes)) {
+                imageIndexes.forEach((slotIdx, i) => {
+                    if (uploadedUrls[i]) {
+                        finalImages[slotIdx] = uploadedUrls[i];
+                    }
+                });
+            } else {
+                finalImages = [...finalImages.filter(Boolean), ...uploadedUrls];
+            }
+        }
+
+        finalImages = finalImages.filter(img => typeof img === 'string' && img.trim() !== '')
+
+        const updatedDesc = Array.isArray(description) 
+            ? description 
+            : (typeof description === 'string' ? description.split('\n') : [])
+
+        await Product.findByIdAndUpdate(id, {
+            name,
+            description: updatedDesc,
+            category,
+            price: Number(price),
+            offerPrice: Number(offerPrice),
+            ...(finalImages.length > 0 && { image: finalImages })
+        })
+
+        res.json({ success: true, message: "Product Updated" })
+
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message })
+    }
+}
+
