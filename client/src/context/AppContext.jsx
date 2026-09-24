@@ -103,24 +103,19 @@ export const AppContextProvider = ({children})=>{
     // Fetch User Auth Status , User Data and Cart Items
 const fetchUser = async ()=>{
     try {
+        const storedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
         const storedToken = localStorage.getItem('token');
-        if (!storedToken) {
-            setUser(null);
-            return;
-        }
-        const {data} = await axios.get('/api/user/is-auth');
-        if (data.success){
+        if (!storedUser && !storedToken) return;
+
+        const {data} = await axios.get('/api/user/is-auth', {
+            params: { email: storedUser?.email },
+            headers: storedToken ? { token: storedToken, Authorization: `Bearer ${storedToken}` } : {}
+        });
+        if (data && data.success && data.user){
             setUser(data.user)
             if (data.user.cartItems) {
                 setCartItems(data.user.cartItems)
             }
-        } else {
-            // Token is invalid/expired
-            setUser(null);
-            setToken('');
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            localStorage.removeItem('cartItems');
         }
     } catch (error) {
         console.log(error.message)

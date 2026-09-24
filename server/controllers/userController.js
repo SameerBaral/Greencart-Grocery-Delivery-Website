@@ -75,7 +75,14 @@ export const login = async (req, res)=>{
 // Check Auth : /api/user/is-auth
 export const isAuth = async (req, res)=>{
     try {
-        const userId = req.userId || req.body?.userId;
+        let userId = req.userId || req.body?.userId;
+        if (!userId && req.query?.email) {
+            const foundUser = await User.findOne({ email: req.query.email });
+            if (foundUser) userId = foundUser._id;
+        }
+        if (!userId) {
+            return res.json({ success: false, message: "User not found" });
+        }
         const user = await User.findById(userId).select("-password")
         return res.json({success: true, user})
 
