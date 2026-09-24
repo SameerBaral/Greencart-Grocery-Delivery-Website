@@ -39,7 +39,7 @@ const Orders = () => {
                             {order.items.map((item, index) => (
                                 <div key={index} className="flex flex-col">
                                     <p className="font-medium">
-                                        {item.product.name}{" "} 
+                                        {item.product?.name || "Product"}{" "} 
                                         <span className="text-primary">x {item.quantity}</span>
                                     </p>
                                 </div>
@@ -49,12 +49,12 @@ const Orders = () => {
 
                     <div className="text-sm md:text-base text-black/60">
                         <p className='text-black/80'>
-                        {order.address.firstName} {order.address.lastName}</p>
+                        {order.address?.firstName} {order.address?.lastName}</p>
 
-                        <p>{order.address.street}, {order.address.city}</p>
-                        <p> {order.address.state}, {order.address.zipcode}, {order.address.country}</p>
+                        <p>{order.address?.street}, {order.address?.city}</p>
+                        <p> {order.address?.state}, {order.address?.zipcode}, {order.address?.country}</p>
                         <p></p>
-                        <p>{order.address.phone}</p>
+                        <p>{order.address?.phone}</p>
                     </div>
 
                     <p className="font-medium text-lg my-auto">
