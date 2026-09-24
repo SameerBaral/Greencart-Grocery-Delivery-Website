@@ -31,12 +31,9 @@ const Cart = () => {
                 if(data.addresses.length > 0){
                     setSelectedAddress(data.addresses[0])
                 }
-            }else{
-                toast.error(data.message)
             }
-            
         } catch (error) {
-            toast.error(error.message)
+            console.log(error.message)
         }
     }
 

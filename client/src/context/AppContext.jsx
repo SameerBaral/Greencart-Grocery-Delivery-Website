@@ -157,11 +157,11 @@ const getCartAmount = () =>{
         const updateCart = async ()=>{
             try {
                 const { data } = await axios.post('/api/cart/update', {cartItems})
-                if (!data.success){
+                if (!data.success && data.message !== "Not Authorized"){
                     toast.error(data.message)
                 }
             } catch (error) {
-                toast.error(error.message)
+                console.log(error.message)
             }
         }
 
