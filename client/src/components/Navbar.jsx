@@ -24,7 +24,10 @@ const Navbar = () => {
       setToken('')
       setUser(null);
       setCartItems({});
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       localStorage.removeItem('cartItems');
+      delete axios.defaults.headers.common['token'];
       navigate('/')
     }
 

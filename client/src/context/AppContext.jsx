@@ -68,8 +68,6 @@ export const AppContextProvider = ({children})=>{
         } else {
             delete axios.defaults.headers.common['token'];
             localStorage.removeItem('token');
-            setUser(null);
-            localStorage.removeItem('user');
         }
     }, [token]);
 

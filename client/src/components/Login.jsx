@@ -21,8 +21,13 @@ const Login = () => {
             if (data.success){
                 if (data.token) {
                     setToken(data.token);
+                    localStorage.setItem('token', data.token);
+                    axios.defaults.headers.common['token'] = data.token;
                 }
-                setUser(data.user)
+                if (data.user) {
+                    setUser(data.user);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                }
                 setShowUserLogin(false)
                 toast.success(state === "login" ? "Logged In" : "Account Created")
                 navigate('/')
