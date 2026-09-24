@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 const authUser = async (req, res, next)=>{
-    let token = req.cookies.token || req.headers.token || req.headers['token'];
+    let token = req.cookies?.token || req.headers.token || req.headers['token'];
 
     if (!token && req.headers.authorization) {
         if (req.headers.authorization.startsWith('Bearer ')) {
@@ -27,10 +27,10 @@ const authUser = async (req, res, next)=>{
             }
             req.body.userId = tokenDecode.id;
             req.userId = tokenDecode.id;
+            next();
         }else{
             return res.json({ success: false, message: 'Not Authorized' });
         }
-        next();
 
     } catch (error) {
         res.json({ success: false, message: error.message });

@@ -7,11 +7,17 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || "https://greencart-backend-rd1m.onrender.com";
 
+// Request interceptor to attach token on every outgoing request
+axios.interceptors.request.use((config) => {
+    const currentToken = localStorage.getItem('token');
+    if (currentToken) {
+        config.headers['token'] = currentToken;
+        config.headers['Authorization'] = `Bearer ${currentToken}`;
+    }
+    return config;
+}, (error) => Promise.reject(error));
+
 const initialToken = localStorage.getItem('token');
-if (initialToken) {
-    axios.defaults.headers.common['token'] = initialToken;
-    axios.defaults.headers.common['Authorization'] = `Bearer ${initialToken}`;
-}
 
 export const AppContext = createContext();
 
@@ -61,15 +67,11 @@ export const AppContextProvider = ({children})=>{
         } catch (e) {}
     }, [cartItems]);
 
-    // Sync token with axios headers and localStorage
+    // Sync token state with localStorage
     useEffect(() => {
         if (token) {
-            axios.defaults.headers.common['token'] = token;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             localStorage.setItem('token', token);
         } else {
-            delete axios.defaults.headers.common['token'];
-            delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('token');
         }
     }, [token]);
@@ -77,10 +79,7 @@ export const AppContextProvider = ({children})=>{
   // Fetch Seller Status
   const fetchSeller = async ()=>{
     try {
-        const storedToken = localStorage.getItem('token');
-        const {data} = await axios.get('/api/seller/is-auth', {
-            headers: storedToken ? { token: storedToken } : {}
-        });
+        const {data} = await axios.get('/api/seller/is-auth');
         if(data.success){
             setIsSeller(true)
         }else{
@@ -95,15 +94,23 @@ export const AppContextProvider = ({children})=>{
 const fetchUser = async ()=>{
     try {
         const storedToken = localStorage.getItem('token');
-        if (!storedToken) return;
-        const {data} = await axios.get('/api/user/is-auth', {
-            headers: { token: storedToken }
-        });
+        if (!storedToken) {
+            setUser(null);
+            return;
+        }
+        const {data} = await axios.get('/api/user/is-auth');
         if (data.success){
             setUser(data.user)
             if (data.user.cartItems) {
                 setCartItems(data.user.cartItems)
             }
+        } else {
+            // Token is invalid/expired
+            setUser(null);
+            setToken('');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('cartItems');
         }
     } catch (error) {
         console.log(error.message)

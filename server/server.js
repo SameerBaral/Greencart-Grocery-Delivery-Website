@@ -36,7 +36,7 @@ app.use(cors({
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'sellertoken', 'authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'token', 'sellertoken', 'authorization', 'Token', 'SellerToken', 'x-requested-with']
 }));
 
 app.post('/stripe', express.raw({type: 'application/json'}), stripeWebhooks)
