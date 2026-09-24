@@ -8,28 +8,7 @@ const Navbar = () => {
     const [open, setOpen] = useState(false)
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const profileMenuRef = useRef(null)
-    const {user, setUser, setToken, setShowUserLogin, navigate, setSearchQuery, searchQuery, getCartCount, axios, setCartItems} = useAppContext();
-
-    const logout = async ()=>{
-      try {
-        const { data } = await axios.get('/api/user/logout')
-        if(data.success){
-          toast.success(data.message)
-        } else {
-          toast.success("Logged Out")
-        }
-      } catch (error) {
-        toast.success("Logged Out")
-      }
-      setToken('')
-      setUser(null);
-      setCartItems({});
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      localStorage.removeItem('cartItems');
-      delete axios.defaults.headers.common['token'];
-      navigate('/')
-    }
+    const {user, setUser, setToken, setShowUserLogin, navigate, setSearchQuery, searchQuery, getCartCount, axios, setCartItems, logout} = useAppContext();
 
     useEffect(()=>{
       if(searchQuery.length > 0){

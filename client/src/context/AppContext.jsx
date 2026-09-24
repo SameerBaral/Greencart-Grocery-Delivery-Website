@@ -229,8 +229,27 @@ const getCartAmount = () =>{
         }
     },[cartItems, user])
 
+    const logout = async () => {
+        isCartFetched.current = false;
+        setToken('');
+        setUser(null);
+        setCartItems({});
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('cartItems');
+        if (axios.defaults.headers && axios.defaults.headers.common) {
+            delete axios.defaults.headers.common['token'];
+            delete axios.defaults.headers.common['Authorization'];
+        }
+        toast.success("Logged Out");
+        navigate('/');
+        try {
+            await axios.get('/api/user/logout');
+        } catch (e) {}
+    }
+
     const value = {navigate, user, setUser, token, setToken, setIsSeller, isSeller,
-        showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartAmount, getCartCount, axios, fetchProducts, setCartItems
+        showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartAmount, getCartCount, axios, fetchProducts, setCartItems, logout
     }
 
     return <AppContext.Provider value={value}>
