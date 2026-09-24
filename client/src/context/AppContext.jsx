@@ -10,6 +10,7 @@ axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || "https://greencart-
 const initialToken = localStorage.getItem('token');
 if (initialToken) {
     axios.defaults.headers.common['token'] = initialToken;
+    axios.defaults.headers.common['Authorization'] = `Bearer ${initialToken}`;
 }
 
 export const AppContext = createContext();
@@ -64,9 +65,11 @@ export const AppContextProvider = ({children})=>{
     useEffect(() => {
         if (token) {
             axios.defaults.headers.common['token'] = token;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             localStorage.setItem('token', token);
         } else {
             delete axios.defaults.headers.common['token'];
+            delete axios.defaults.headers.common['Authorization'];
             localStorage.removeItem('token');
         }
     }, [token]);

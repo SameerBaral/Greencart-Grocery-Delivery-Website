@@ -1,7 +1,19 @@
 import jwt from 'jsonwebtoken';
 
 const authUser = async (req, res, next)=>{
-    const token = req.cookies.token || req.headers.token || (req.headers.authorization && req.headers.authorization.startsWith('Bearer ') ? req.headers.authorization.split(' ')[1] : null);
+    let token = req.cookies.token || req.headers.token || req.headers['token'];
+
+    if (!token && req.headers.authorization) {
+        if (req.headers.authorization.startsWith('Bearer ')) {
+            token = req.headers.authorization.split(' ')[1];
+        } else {
+            token = req.headers.authorization;
+        }
+    }
+
+    if (!token && req.body && req.body.token) {
+        token = req.body.token;
+    }
 
     if(!token){
         return res.json({ success: false, message: 'Not Authorized' });
