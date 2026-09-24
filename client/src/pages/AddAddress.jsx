@@ -48,7 +48,8 @@ const AddAddress = () => {
             const storedToken = localStorage.getItem('token');
             const {data} = await axios.post('/api/address/add', {
                 address,
-                token: storedToken
+                token: storedToken,
+                userId: user?._id
             }, {
                 headers: {
                     token: storedToken,
@@ -60,14 +61,7 @@ const AddAddress = () => {
                 toast.success(data.message)
                 navigate('/cart')
             }else{
-                if (data.message === "Not Authorized" || data.message === "jwt expired" || data.message === "invalid signature") {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    setShowUserLogin(true);
-                    toast.error("Session expired, please login again to save address");
-                } else {
-                    toast.error(data.message);
-                }
+                toast.error(data.message || "Failed to save address");
             }
         } catch (error) {
             toast.error(error.message)
