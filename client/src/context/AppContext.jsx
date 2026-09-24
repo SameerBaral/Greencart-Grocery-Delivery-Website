@@ -20,7 +20,14 @@ export const AppContextProvider = ({children})=>{
 
     const navigate = useNavigate();
     const [token, setToken] = useState(initialToken || '')
-    const [user, setUser] = useState(null)
+    const [user, setUser] = useState(() => {
+        try {
+            const localUser = localStorage.getItem('user');
+            return localUser ? JSON.parse(localUser) : null;
+        } catch (e) {
+            return null;
+        }
+    })
     const [isSeller, setIsSeller] = useState(false)
     const [showUserLogin, setShowUserLogin] = useState(false)
     const [products, setProducts] = useState([])
@@ -34,6 +41,17 @@ export const AppContextProvider = ({children})=>{
         }
     })
     const [searchQuery, setSearchQuery] = useState({})
+
+    // Persist user in localStorage
+    useEffect(() => {
+        if (user) {
+            try {
+                localStorage.setItem('user', JSON.stringify(user));
+            } catch (e) {}
+        } else {
+            localStorage.removeItem('user');
+        }
+    }, [user]);
 
     // Persist cartItems in localStorage
     useEffect(() => {
@@ -50,6 +68,8 @@ export const AppContextProvider = ({children})=>{
         } else {
             delete axios.defaults.headers.common['token'];
             localStorage.removeItem('token');
+            setUser(null);
+            localStorage.removeItem('user');
         }
     }, [token]);
 
@@ -74,17 +94,18 @@ export const AppContextProvider = ({children})=>{
 const fetchUser = async ()=>{
     try {
         const storedToken = localStorage.getItem('token');
+        if (!storedToken) return;
         const {data} = await axios.get('/api/user/is-auth', {
-            headers: storedToken ? { token: storedToken } : {}
+            headers: { token: storedToken }
         });
         if (data.success){
             setUser(data.user)
-            setCartItems(data.user.cartItems || {})
-        } else {
-            setUser(null)
+            if (data.user.cartItems) {
+                setCartItems(data.user.cartItems)
+            }
         }
     } catch (error) {
-        setUser(null)
+        console.log(error.message)
     }
 }
 
