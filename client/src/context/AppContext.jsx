@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
+axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || "https://greencart-backend-rd1m.onrender.com";
 
 const initialToken = localStorage.getItem('token');
 if (initialToken) {
@@ -25,8 +25,22 @@ export const AppContextProvider = ({children})=>{
     const [showUserLogin, setShowUserLogin] = useState(false)
     const [products, setProducts] = useState([])
 
-    const [cartItems, setCartItems] = useState({})
+    const [cartItems, setCartItems] = useState(() => {
+        try {
+            const localCart = localStorage.getItem('cartItems');
+            return localCart ? JSON.parse(localCart) : {};
+        } catch (e) {
+            return {};
+        }
+    })
     const [searchQuery, setSearchQuery] = useState({})
+
+    // Persist cartItems in localStorage
+    useEffect(() => {
+        try {
+            localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        } catch (e) {}
+    }, [cartItems]);
 
     // Sync token with axios headers and localStorage
     useEffect(() => {

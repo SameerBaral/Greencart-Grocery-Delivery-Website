@@ -8,7 +8,7 @@ const Navbar = () => {
     const [open, setOpen] = useState(false)
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const profileMenuRef = useRef(null)
-    const {user, setUser, setToken, setShowUserLogin, navigate, setSearchQuery, searchQuery, getCartCount, axios} = useAppContext();
+    const {user, setUser, setToken, setShowUserLogin, navigate, setSearchQuery, searchQuery, getCartCount, axios, setCartItems} = useAppContext();
 
     const logout = async ()=>{
       try {
@@ -23,6 +23,8 @@ const Navbar = () => {
       }
       setToken('')
       setUser(null);
+      setCartItems({});
+      localStorage.removeItem('cartItems');
       navigate('/')
     }
 
