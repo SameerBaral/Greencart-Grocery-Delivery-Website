@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { dummyProducts } from "../assets/assets";
 import toast from "react-hot-toast";
@@ -86,8 +86,10 @@ export const AppContextProvider = ({children})=>{
         }
     }, [token]);
 
-  // Fetch Seller Status
-  const fetchSeller = async ()=>{
+    const isCartFetched = useRef(false);
+
+    // Fetch Seller Status
+    const fetchSeller = async ()=>{
     try {
         const {data} = await axios.get('/api/seller/is-auth');
         if(data.success){
@@ -113,9 +115,11 @@ const fetchUser = async ()=>{
         });
         if (data && data.success && data.user){
             setUser(data.user)
-            if (data.user.cartItems) {
+            if (data.user.cartItems && Object.keys(data.user.cartItems).length > 0) {
                 setCartItems(data.user.cartItems)
+                localStorage.setItem('cartItems', JSON.stringify(data.user.cartItems));
             }
+            isCartFetched.current = true;
         }
     } catch (error) {
         console.log(error.message)
@@ -140,6 +144,7 @@ const fetchUser = async ()=>{
 
 // Add Product to Cart
 const addToCart = (itemId)=>{
+    isCartFetched.current = true;
     let cartData = structuredClone(cartItems);
 
     if(cartData[itemId]){
@@ -153,6 +158,7 @@ const addToCart = (itemId)=>{
 
   // Update Cart Item Quantity
   const updateCartItem = (itemId, quantity)=>{
+    isCartFetched.current = true;
     let cartData = structuredClone(cartItems);
     cartData[itemId] = quantity;
     setCartItems(cartData)
@@ -161,6 +167,7 @@ const addToCart = (itemId)=>{
 
 // Remove Product from Cart
 const removeFromCart = (itemId)=>{
+    isCartFetched.current = true;
     let cartData = structuredClone(cartItems);
     if(cartData[itemId]){
         cartData[itemId] -= 1;
@@ -204,19 +211,23 @@ const getCartAmount = () =>{
     useEffect(()=>{
         const updateCart = async ()=>{
             try {
-                const { data } = await axios.post('/api/cart/update', {cartItems})
+                const storedToken = localStorage.getItem('token');
+                const { data } = await axios.post('/api/cart/update', 
+                    { cartItems, userId: user?._id, email: user?.email },
+                    { headers: storedToken ? { token: storedToken, Authorization: `Bearer ${storedToken}` } : {} }
+                )
                 if (!data.success && data.message !== "Not Authorized"){
-                    toast.error(data.message)
+                    console.log(data.message)
                 }
             } catch (error) {
                 console.log(error.message)
             }
         }
 
-        if(user){
+        if(user && isCartFetched.current){
             updateCart()
         }
-    },[cartItems])
+    },[cartItems, user])
 
     const value = {navigate, user, setUser, token, setToken, setIsSeller, isSeller,
         showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartAmount, getCartCount, axios, fetchProducts, setCartItems

@@ -4,9 +4,19 @@ import User from "../models/User.js"
 
 export const updateCart = async (req, res)=>{
     try {
-        const userId = req.userId || req.body?.userId;
-        const { cartItems } = req.body     
-        await User.findByIdAndUpdate(userId, {cartItems})
+        let userId = req.userId || req.body?.userId;
+        const { cartItems, email } = req.body     
+
+        if (!userId && email) {
+            const user = await User.findOne({ email });
+            if (user) userId = user._id;
+        }
+
+        if (!userId) {
+            return res.json({ success: false, message: "Not Authorized" });
+        }
+
+        await User.findByIdAndUpdate(userId, { cartItems })
         res.json({ success: true, message: "Cart Updated" })
 
     } catch (error) {
