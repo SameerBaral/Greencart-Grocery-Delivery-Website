@@ -15,13 +15,14 @@ const Navbar = () => {
         const { data } = await axios.get('/api/user/logout')
         if(data.success){
           toast.success(data.message)
+        } else {
+          toast.success("Logged Out")
         }
       } catch (error) {
-        console.log(error.message)
+        toast.success("Logged Out")
       }
       setToken('')
       setUser(null);
-      toast.success("Logged Out successfully")
       navigate('/')
     }
 

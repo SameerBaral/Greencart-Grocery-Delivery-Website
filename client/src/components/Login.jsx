@@ -24,7 +24,7 @@ const Login = () => {
                 }
                 setUser(data.user)
                 setShowUserLogin(false)
-                toast.success(state === "login" ? "Logged in successfully" : "Account created successfully")
+                toast.success(state === "login" ? "Logged In" : "Account Created")
                 navigate('/')
             }else{
                 toast.error(data.message)
