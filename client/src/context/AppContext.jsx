@@ -7,6 +7,11 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL;
 
+const initialToken = localStorage.getItem('token');
+if (initialToken) {
+    axios.defaults.headers.common['token'] = initialToken;
+}
+
 export const AppContext = createContext();
 
 export const AppContextProvider = ({children})=>{
@@ -14,7 +19,7 @@ export const AppContextProvider = ({children})=>{
     const currency = import.meta.env.VITE_CURRENCY;
 
     const navigate = useNavigate();
-    const [token, setToken] = useState(localStorage.getItem('token') || '')
+    const [token, setToken] = useState(initialToken || '')
     const [user, setUser] = useState(null)
     const [isSeller, setIsSeller] = useState(false)
     const [showUserLogin, setShowUserLogin] = useState(false)
@@ -37,7 +42,10 @@ export const AppContextProvider = ({children})=>{
   // Fetch Seller Status
   const fetchSeller = async ()=>{
     try {
-        const {data} = await axios.get('/api/seller/is-auth');
+        const storedToken = localStorage.getItem('token');
+        const {data} = await axios.get('/api/seller/is-auth', {
+            headers: storedToken ? { token: storedToken } : {}
+        });
         if(data.success){
             setIsSeller(true)
         }else{
@@ -51,10 +59,15 @@ export const AppContextProvider = ({children})=>{
     // Fetch User Auth Status , User Data and Cart Items
 const fetchUser = async ()=>{
     try {
-        const {data} = await axios.get('/api/user/is-auth');
+        const storedToken = localStorage.getItem('token');
+        const {data} = await axios.get('/api/user/is-auth', {
+            headers: storedToken ? { token: storedToken } : {}
+        });
         if (data.success){
             setUser(data.user)
-            setCartItems(data.user.cartItems)
+            setCartItems(data.user.cartItems || {})
+        } else {
+            setUser(null)
         }
     } catch (error) {
         setUser(null)
