@@ -38,8 +38,6 @@ const AddAddress = () => {
             ...prevAddress,
             [name]: value,
         }))
-        console.log(address);
-        
     }
 
 
@@ -47,13 +45,21 @@ const AddAddress = () => {
     const onSubmitHandler = async (e)=>{
         e.preventDefault();
         try {
-            const {data} = await axios.post('/api/address/add', {address});
+            const storedToken = localStorage.getItem('token');
+            const {data} = await axios.post('/api/address/add', {address}, {
+                headers: storedToken ? { token: storedToken } : {}
+            });
 
             if (data.success){
                 toast.success(data.message)
                 navigate('/cart')
             }else{
-                toast.error(data.message)
+                if (data.message === "Not Authorized") {
+                    setShowUserLogin(true);
+                    toast.error("Please login to save address");
+                } else {
+                    toast.error(data.message);
+                }
             }
         } catch (error) {
             toast.error(error.message)

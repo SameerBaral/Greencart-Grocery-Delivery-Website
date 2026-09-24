@@ -47,13 +47,16 @@ const Cart = () => {
                 return toast.error("Please select an address")
             }
 
+            const storedToken = localStorage.getItem('token');
+            const authHeader = storedToken ? { headers: { token: storedToken } } : {};
+
             // Place Order with COD
             if(paymentOption === "COD"){
                 const {data} = await axios.post('/api/order/cod', {
                     userId: user._id,
                     items: cartArray.map(item=> ({product: item._id, quantity: item.quantity})),
                     address: selectedAddress._id
-                })
+                }, authHeader)
 
                 if(data.success){
                     toast.success(data.message)
@@ -68,7 +71,7 @@ const Cart = () => {
                     userId: user._id,
                     items: cartArray.map(item=> ({product: item._id, quantity: item.quantity})),
                     address: selectedAddress._id
-                })
+                }, authHeader)
 
                 if(data.success){
                     window.location.replace(data.url)
