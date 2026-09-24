@@ -22,7 +22,6 @@ await connectCloudinary()
 const allowedOrigins = [
     'http://localhost:5173',
     'http://localhost:5174',
-    'https://greencart-grocery-gamma.vercel.app',
     process.env.CLIENT_URL
 ].filter(Boolean);
 
