@@ -11,8 +11,18 @@ axios.defaults.baseURL = import.meta.env.VITE_BACKEND_URL || "https://greencart-
 axios.interceptors.request.use((config) => {
     const currentToken = localStorage.getItem('token');
     if (currentToken) {
-        config.headers['token'] = currentToken;
-        config.headers['Authorization'] = `Bearer ${currentToken}`;
+        if (config.headers && typeof config.headers.set === 'function') {
+            config.headers.set('token', currentToken);
+            config.headers.set('Authorization', `Bearer ${currentToken}`);
+        } else if (config.headers) {
+            config.headers['token'] = currentToken;
+            config.headers['Authorization'] = `Bearer ${currentToken}`;
+        } else {
+            config.headers = {
+                token: currentToken,
+                Authorization: `Bearer ${currentToken}`
+            };
+        }
     }
     return config;
 }, (error) => Promise.reject(error));

@@ -25,7 +25,10 @@ const Cart = () => {
 
     const getUserAddress = async ()=>{
         try {
-            const {data} = await axios.get('/api/address/get');
+            const storedToken = localStorage.getItem('token');
+            const {data} = await axios.get('/api/address/get', {
+                headers: { token: storedToken, Authorization: `Bearer ${storedToken}` }
+            });
             if (data.success){
                 setAddresses(data.addresses)
                 if(data.addresses.length > 0){
@@ -47,13 +50,17 @@ const Cart = () => {
                 return toast.error("Please select an address")
             }
 
+            const storedToken = localStorage.getItem('token');
+            const authHeader = { headers: { token: storedToken, Authorization: `Bearer ${storedToken}` } };
+
             // Place Order with COD
             if(paymentOption === "COD"){
                 const {data} = await axios.post('/api/order/cod', {
                     userId: user._id,
                     items: cartArray.map(item=> ({product: item._id, quantity: item.quantity})),
-                    address: selectedAddress._id
-                })
+                    address: selectedAddress._id,
+                    token: storedToken
+                }, authHeader)
 
                 if(data.success){
                     toast.success(data.message)
@@ -67,8 +74,9 @@ const Cart = () => {
                 const {data} = await axios.post('/api/order/stripe', {
                     userId: user._id,
                     items: cartArray.map(item=> ({product: item._id, quantity: item.quantity})),
-                    address: selectedAddress._id
-                })
+                    address: selectedAddress._id,
+                    token: storedToken
+                }, authHeader)
 
                 if(data.success){
                     window.location.replace(data.url)
