@@ -46,8 +46,12 @@ const AddAddress = () => {
         e.preventDefault();
         try {
             const storedToken = localStorage.getItem('token');
+            const addressData = {
+                ...address,
+                email: address.email || user?.email || ""
+            };
             const {data} = await axios.post('/api/address/add', {
-                address,
+                address: addressData,
                 token: storedToken,
                 userId: user?._id
             }, {

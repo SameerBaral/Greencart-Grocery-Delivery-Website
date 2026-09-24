@@ -11,6 +11,7 @@ const MyOrders = () => {
         try {
             const storedToken = localStorage.getItem('token');
             const { data } = await axios.get('/api/order/user', {
+                params: { email: user?.email },
                 headers: { token: storedToken, Authorization: `Bearer ${storedToken}` }
             })
             if(data.success){

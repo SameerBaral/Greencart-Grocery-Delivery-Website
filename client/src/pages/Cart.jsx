@@ -27,6 +27,7 @@ const Cart = () => {
         try {
             const storedToken = localStorage.getItem('token');
             const {data} = await axios.get('/api/address/get', {
+                params: { email: user?.email },
                 headers: { token: storedToken, Authorization: `Bearer ${storedToken}` }
             });
             if (data.success){
