@@ -20,7 +20,7 @@ export const register = async (req, res)=>{
 
         const user = await User.create({name, email, password: hashedPassword})
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET || 'greencart_jwt_secret_key_2026', {expiresIn: '7d'});
 
         res.cookie('token', token, {
             httpOnly: true, // Prevent JavaScript to access cookie
@@ -55,7 +55,7 @@ export const login = async (req, res)=>{
         if(!isMatch)
             return res.json({success: false, message: 'Invalid email or password'});
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '7d'});
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET || 'greencart_jwt_secret_key_2026', {expiresIn: '7d'});
 
         res.cookie('token', token, {
             httpOnly: true, 
