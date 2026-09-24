@@ -8,21 +8,21 @@ const Navbar = () => {
     const [open, setOpen] = useState(false)
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const profileMenuRef = useRef(null)
-    const {user, setUser, setShowUserLogin, navigate, setSearchQuery, searchQuery, getCartCount, axios} = useAppContext();
+    const {user, setUser, setToken, setShowUserLogin, navigate, setSearchQuery, searchQuery, getCartCount, axios} = useAppContext();
 
     const logout = async ()=>{
       try {
         const { data } = await axios.get('/api/user/logout')
         if(data.success){
           toast.success(data.message)
-          setUser(null);
-          navigate('/')
-        }else{
-          toast.error(data.message)
         }
       } catch (error) {
-        toast.error(error.message)
+        console.log(error.message)
       }
+      setToken('')
+      setUser(null);
+      toast.success("Logged Out successfully")
+      navigate('/')
     }
 
     useEffect(()=>{

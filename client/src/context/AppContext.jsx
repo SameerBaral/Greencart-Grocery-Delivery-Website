@@ -14,6 +14,7 @@ export const AppContextProvider = ({children})=>{
     const currency = import.meta.env.VITE_CURRENCY;
 
     const navigate = useNavigate();
+    const [token, setToken] = useState(localStorage.getItem('token') || '')
     const [user, setUser] = useState(null)
     const [isSeller, setIsSeller] = useState(false)
     const [showUserLogin, setShowUserLogin] = useState(false)
@@ -21,6 +22,17 @@ export const AppContextProvider = ({children})=>{
 
     const [cartItems, setCartItems] = useState({})
     const [searchQuery, setSearchQuery] = useState({})
+
+    // Sync token with axios headers and localStorage
+    useEffect(() => {
+        if (token) {
+            axios.defaults.headers.common['token'] = token;
+            localStorage.setItem('token', token);
+        } else {
+            delete axios.defaults.headers.common['token'];
+            localStorage.removeItem('token');
+        }
+    }, [token]);
 
   // Fetch Seller Status
   const fetchSeller = async ()=>{
@@ -145,7 +157,7 @@ const getCartAmount = () =>{
         }
     },[cartItems])
 
-    const value = {navigate, user, setUser, setIsSeller, isSeller,
+    const value = {navigate, user, setUser, token, setToken, setIsSeller, isSeller,
         showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartAmount, getCartCount, axios, fetchProducts, setCartItems
     }
 
