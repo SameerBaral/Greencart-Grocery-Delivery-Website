@@ -14,7 +14,12 @@ const orderSchema = new mongoose.Schema({
     date: {type: Number, default: Date.now},
     orderTime: {
         type: String,
-        default: () => new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+        default: () => {
+            const d = new Date();
+            const dateStr = d.toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" });
+            const timeStr = d.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+            return `${dateStr}, ${timeStr}`;
+        }
     }
 },{ timestamps: true })
 

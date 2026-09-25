@@ -62,7 +62,7 @@ const Orders = () => {
 
                     <div className="flex flex-col text-sm md:text-base text-black/60">
                         <p>Method: {order.paymentType}</p>
-                        <p>Date: {new Date(order.createdAt || order.date).toLocaleDateString()}</p>
+                        <p>Date: {new Date(order.createdAt || order.date).toLocaleDateString('en-GB')}</p>
                         <p>Time: {new Date(order.createdAt || order.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}</p>
                         <p>Payment: {order.isPaid ? "Paid" : "Pending"}</p>
                     </div>

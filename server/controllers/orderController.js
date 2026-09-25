@@ -26,7 +26,7 @@ export const placeOrderCOD = async (req, res)=>{
             address,
             paymentType: "COD",
             date: Date.now(),
-            orderTime: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+            orderTime: `${new Date().toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" })}, ${new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`
         });
 
         return res.json({success: true, message: "Order Placed Successfully" })
@@ -68,7 +68,7 @@ export const placeOrderStripe = async (req, res)=>{
             address,
             paymentType: "Online",
             date: Date.now(),
-            orderTime: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+            orderTime: `${new Date().toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" })}, ${new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}`
         });
 
     // Stripe Gateway Initialize    
