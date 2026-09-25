@@ -11,6 +11,11 @@ const orderSchema = new mongoose.Schema({
     status: {type: String, default: 'Order Placed'},
     paymentType: {type: String, required: true},
     isPaid: {type: Boolean, required: true, default: false},
+    date: {type: Number, default: Date.now},
+    orderTime: {
+        type: String,
+        default: () => new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+    }
 },{ timestamps: true })
 
 const Order = mongoose.models.order || mongoose.model('order', orderSchema)
