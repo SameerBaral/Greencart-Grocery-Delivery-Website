@@ -183,6 +183,55 @@ export const stripeWebhooks = async (request, response)=>{
 }
 
 
+// Update Order Status (for seller / admin) : /api/order/status
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId, status } = req.body;
+        if (!orderId || !status) {
+            return res.json({ success: false, message: "Invalid orderId or status" });
+        }
+
+        const updateFields = { status };
+        // If status is updated to Delivered, mark COD payment as Paid automatically
+        if (status === "Delivered") {
+            updateFields.isPaid = true;
+        }
+
+        await Order.findByIdAndUpdate(orderId, updateFields);
+        return res.json({ success: true, message: `Order status updated to "${status}"` });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
+
+// Cancel Order (for user) : /api/order/cancel
+export const cancelOrder = async (req, res) => {
+    try {
+        const { orderId } = req.body;
+        if (!orderId) {
+            return res.json({ success: false, message: "Order ID is required" });
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
+        }
+
+        if (order.status === "Delivered") {
+            return res.json({ success: false, message: "Delivered order cannot be cancelled" });
+        }
+
+        if (order.status === "Cancelled") {
+            return res.json({ success: false, message: "Order is already cancelled" });
+        }
+
+        await Order.findByIdAndUpdate(orderId, { status: "Cancelled" });
+        return res.json({ success: true, message: "Order cancelled successfully" });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
+
 // Get Orders by User ID : /api/order/user
 export const getUserOrders = async (req, res)=>{
     try {
