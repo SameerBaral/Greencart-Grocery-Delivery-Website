@@ -228,15 +228,6 @@ const MyOrders = () => {
                                 <p className={`text-base font-semibold ${isCancelled ? 'line-through text-gray-400' : 'text-primary'}`}>
                                     Amount: {currency}{(item.product?.offerPrice || 0) * item.quantity}
                                 </p>
-
-                                {isEligibleForCancel && (
-                                    <button 
-                                        onClick={() => handleCancelItem(order._id, itemId, item.product?.name)}
-                                        className="text-xs px-2.5 py-1 text-red-600 border border-red-300 rounded hover:bg-red-50 font-medium transition cursor-pointer"
-                                    >
-                                        Cancel Item
-                                    </button>
-                                )}
                             </div>
 
                         </div>
