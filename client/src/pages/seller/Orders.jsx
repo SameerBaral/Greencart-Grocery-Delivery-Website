@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 const Orders = () => {
     const {currency, axios} = useAppContext()
     const [orders, setOrders] = useState([])
+    const [statusFilter, setStatusFilter] = useState('All')
 
     const fetchOrders = async () =>{
         try {
@@ -47,14 +48,103 @@ const Orders = () => {
         fetchOrders();
     },[])
 
+    // Stat calculations
+    const totalOrdersCount = orders.length;
+    const deliveredOrdersCount = orders.filter(order => order.status === 'Delivered').length;
+    const cancelledOrdersCount = orders.filter(order => 
+        order.status === 'Cancelled' || (order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))
+    ).length;
+
+    // Total earnings from Delivered or Paid orders
+    const totalEarnings = orders
+        .filter(order => order.status === 'Delivered' || order.isPaid)
+        .reduce((acc, order) => acc + (order.amount || 0), 0);
+
+    const filteredOrders = orders.filter(order => {
+        if (statusFilter === 'All') return true;
+        if (statusFilter === 'Delivered') return order.status === 'Delivered';
+        if (statusFilter === 'Cancelled') {
+            return order.status === 'Cancelled' || (order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'));
+        }
+        return order.status === statusFilter;
+    });
+
     return (
         <div className='no-scrollbar flex-1 h-[95vh] overflow-y-scroll'>
             <div className="md:p-10 p-4 space-y-4">
-                <h2 className="text-lg font-medium">Orders List</h2>
-                {orders.length === 0 ? (
+                
+                {/* Summary Dashboard Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl">
+                    <div 
+                        onClick={() => setStatusFilter('All')} 
+                        className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'All' ? 'ring-2 ring-blue-500 border-blue-400' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg font-bold text-xl">
+                            📦
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 font-medium">Total Orders</p>
+                            <p className="text-xl font-bold text-gray-800">{totalOrdersCount}</p>
+                        </div>
+                    </div>
+
+                    <div 
+                        onClick={() => setStatusFilter('Delivered')} 
+                        className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'Delivered' ? 'ring-2 ring-green-500 border-green-400' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                        <div className="p-3 bg-green-50 text-green-600 rounded-lg font-bold text-xl">
+                            ✅
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 font-medium">Delivered</p>
+                            <p className="text-xl font-bold text-green-700">{deliveredOrdersCount}</p>
+                        </div>
+                    </div>
+
+                    <div 
+                        onClick={() => setStatusFilter('Cancelled')} 
+                        className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'Cancelled' ? 'ring-2 ring-red-500 border-red-400' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                        <div className="p-3 bg-red-50 text-red-600 rounded-lg font-bold text-xl">
+                            ❌
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 font-medium">Cancelled</p>
+                            <p className="text-xl font-bold text-red-600">{cancelledOrdersCount}</p>
+                        </div>
+                    </div>
+
+                    <div 
+                        className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3"
+                    >
+                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg font-bold text-xl">
+                            💰
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 font-medium">Total Earnings</p>
+                            <p className="text-xl font-bold text-emerald-700">{currency}{totalEarnings}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between max-w-4xl pt-2">
+                    <h2 className="text-lg font-medium">
+                        Orders List {statusFilter !== 'All' && <span className="text-sm font-normal text-gray-500">({statusFilter})</span>}
+                    </h2>
+                    {statusFilter !== 'All' && (
+                        <button 
+                            onClick={() => setStatusFilter('All')}
+                            className="text-xs text-primary font-medium hover:underline cursor-pointer"
+                        >
+                            Show All Orders
+                        </button>
+                    )}
+                </div>
+
+                {filteredOrders.length === 0 ? (
                     <p className="text-gray-500">No orders found.</p>
                 ) : (
-                    orders.map((order, index) => (
+                    filteredOrders.map((order, index) => (
                         <div key={index} className="flex flex-col md:items-center md:flex-row gap-5 justify-between p-5 max-w-4xl rounded-md border border-gray-300 bg-white shadow-sm hover:shadow-md transition">
 
                             <div className="flex gap-4 max-w-80">
