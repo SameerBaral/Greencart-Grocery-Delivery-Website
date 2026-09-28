@@ -260,7 +260,8 @@ export const cancelOrderItem = async (req, res) => {
             return res.json({ success: false, message: "No items specified for cancellation" });
         }
 
-        const order = await Order.findById(orderId).populate("items.product");
+        // Fetch order WITHOUT populate so items.product remains a pure String ID matching schema
+        const order = await Order.findById(orderId);
         if (!order) {
             return res.json({ success: false, message: "Order not found" });
         }
@@ -278,7 +279,7 @@ export const cancelOrderItem = async (req, res) => {
         order.items.forEach(item => {
             const itemMatch = idsToCancel.some(id => 
                 id.toString() === item._id?.toString() || 
-                id.toString() === (item.product?._id || item.product)?.toString()
+                id.toString() === item.product?.toString()
             );
 
             if (itemMatch && item.status !== "Cancelled" && item.status !== "Delivered") {
@@ -297,20 +298,22 @@ export const cancelOrderItem = async (req, res) => {
             order.status = "Cancelled";
             order.amount = 0;
         } else {
+            // Query products separately to calculate subtotal for remaining active items
+            const activeProductIds = activeItems.map(item => item.product);
+            const productsList = await Product.find({ _id: { $in: activeProductIds } });
+
+            const productPriceMap = {};
+            productsList.forEach(p => {
+                productPriceMap[p._id.toString()] = p.offerPrice;
+            });
+
             let subtotal = 0;
             for (const item of activeItems) {
-                const price = item.product?.offerPrice || 0;
+                const price = productPriceMap[item.product?.toString()] || 0;
                 subtotal += price * item.quantity;
             }
             order.amount = subtotal + Math.floor(subtotal * 0.02);
         }
-
-        order.items = order.items.map(item => ({
-            _id: item._id,
-            product: item.product?._id || item.product,
-            quantity: item.quantity,
-            status: item.status || "Order Placed"
-        }));
 
         await order.save();
         return res.json({ 
