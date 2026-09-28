@@ -60,14 +60,24 @@ const Orders = () => {
                             <div className="flex gap-4 max-w-80">
                                 <img className="w-12 h-12 object-cover rounded bg-gray-100 p-2" src={assets.box_icon} alt="boxIcon" />
                                 <div>
-                                    {order.items.map((item, idx) => (
-                                        <div key={idx} className="flex flex-col">
-                                            <p className="font-medium text-gray-800">
-                                                {item.product?.name || "Product"}{" "} 
-                                                <span className="text-primary font-semibold">x {item.quantity}</span>
-                                            </p>
-                                        </div>
-                                    ))}
+                                    {order.items.map((item, idx) => {
+                                        const itemStatus = item.status || order.status;
+                                        const isCancelled = itemStatus === 'Cancelled';
+
+                                        return (
+                                            <div key={idx} className="flex items-center gap-2 mb-1">
+                                                <p className={`font-medium ${isCancelled ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                                                    {item.product?.name || "Product"}{" "} 
+                                                    <span className={isCancelled ? 'text-gray-400 font-normal' : 'text-primary font-semibold'}>x {item.quantity}</span>
+                                                </p>
+                                                {isCancelled && (
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded font-bold bg-red-100 text-red-700 border border-red-200">
+                                                        Cancelled
+                                                    </span>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
 

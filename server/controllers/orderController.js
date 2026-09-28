@@ -191,13 +191,23 @@ export const updateOrderStatus = async (req, res) => {
             return res.json({ success: false, message: "Invalid orderId or status" });
         }
 
-        const updateFields = { status };
-        // If status is updated to Delivered, mark COD payment as Paid automatically
-        if (status === "Delivered") {
-            updateFields.isPaid = true;
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
         }
 
-        await Order.findByIdAndUpdate(orderId, updateFields);
+        order.status = status;
+        if (status === "Delivered") {
+            order.isPaid = true;
+        }
+
+        order.items.forEach(item => {
+            if (item.status !== "Cancelled") {
+                item.status = status;
+            }
+        });
+
+        await order.save();
         return res.json({ success: true, message: `Order status updated to "${status}"` });
     } catch (error) {
         return res.json({ success: false, message: error.message });
@@ -225,8 +235,88 @@ export const cancelOrder = async (req, res) => {
             return res.json({ success: false, message: "Order is already cancelled" });
         }
 
-        await Order.findByIdAndUpdate(orderId, { status: "Cancelled" });
-        return res.json({ success: true, message: "Order cancelled successfully" });
+        order.status = "Cancelled";
+        order.items.forEach(item => {
+            item.status = "Cancelled";
+        });
+
+        await order.save();
+        return res.json({ success: true, message: "Entire order cancelled successfully" });
+    } catch (error) {
+        return res.json({ success: false, message: error.message });
+    }
+};
+
+// Cancel Individual Order Item(s) : /api/order/cancel-item
+export const cancelOrderItem = async (req, res) => {
+    try {
+        const { orderId, itemId, itemIds } = req.body;
+        if (!orderId) {
+            return res.json({ success: false, message: "Order ID is required" });
+        }
+
+        const idsToCancel = (itemIds && Array.isArray(itemIds)) ? itemIds : (itemId ? [itemId] : []);
+        if (idsToCancel.length === 0) {
+            return res.json({ success: false, message: "No items specified for cancellation" });
+        }
+
+        const order = await Order.findById(orderId).populate("items.product");
+        if (!order) {
+            return res.json({ success: false, message: "Order not found" });
+        }
+
+        if (order.status === "Delivered") {
+            return res.json({ success: false, message: "Delivered order cannot be cancelled" });
+        }
+
+        if (order.status === "Cancelled") {
+            return res.json({ success: false, message: "Order is already cancelled" });
+        }
+
+        let itemsUpdatedCount = 0;
+
+        order.items.forEach(item => {
+            const itemMatch = idsToCancel.some(id => 
+                id.toString() === item._id?.toString() || 
+                id.toString() === (item.product?._id || item.product)?.toString()
+            );
+
+            if (itemMatch && item.status !== "Cancelled" && item.status !== "Delivered") {
+                item.status = "Cancelled";
+                itemsUpdatedCount++;
+            }
+        });
+
+        if (itemsUpdatedCount === 0) {
+            return res.json({ success: false, message: "Selected item(s) cannot be cancelled or are already cancelled" });
+        }
+
+        const activeItems = order.items.filter(item => item.status !== "Cancelled");
+
+        if (activeItems.length === 0) {
+            order.status = "Cancelled";
+            order.amount = 0;
+        } else {
+            let subtotal = 0;
+            for (const item of activeItems) {
+                const price = item.product?.offerPrice || 0;
+                subtotal += price * item.quantity;
+            }
+            order.amount = subtotal + Math.floor(subtotal * 0.02);
+        }
+
+        order.items = order.items.map(item => ({
+            _id: item._id,
+            product: item.product?._id || item.product,
+            quantity: item.quantity,
+            status: item.status || "Order Placed"
+        }));
+
+        await order.save();
+        return res.json({ 
+            success: true, 
+            message: `${itemsUpdatedCount} item(s) cancelled successfully`
+        });
     } catch (error) {
         return res.json({ success: false, message: error.message });
     }
