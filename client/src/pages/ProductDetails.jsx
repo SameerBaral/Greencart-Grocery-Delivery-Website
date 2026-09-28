@@ -14,12 +14,12 @@ const ProductDetails = () => {
     const product = products.find((item)=> item._id === id);
 
     useEffect(()=>{
-        if(products.length > 0){
+        if(products.length > 0 && product){
             let productsCopy = products.slice();
-            productsCopy = productsCopy.filter((item)=> product.category === item.category)
+            productsCopy = productsCopy.filter((item)=> product.category === item.category && item.inStock && item._id !== id)
             setRelatedProducts(productsCopy.slice(0,5))
         }
-    },[products])
+    },[products, product, id])
 
     useEffect(()=>{
         setThumbnail(product?.image[0] ? product.image[0] : null)
@@ -73,14 +73,22 @@ const ProductDetails = () => {
                         ))}
                     </ul>
 
-                    <div className="flex items-center mt-10 gap-4 text-base">
-                        <button onClick={()=> addToCart(product._id)} className="w-full py-3.5 cursor-pointer font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition" >
-                            Add to Cart
-                        </button>
-                        <button onClick={()=> {addToCart(product._id); navigate("/cart")}} className="w-full py-3.5 cursor-pointer font-medium bg-primary text-white hover:bg-primary-dull transition" >
-                            Buy now
-                        </button>
-                    </div>
+                    {product.inStock ? (
+                        <div className="flex items-center mt-10 gap-4 text-base">
+                            <button onClick={()=> addToCart(product._id)} className="w-full py-3.5 cursor-pointer font-medium bg-gray-100 text-gray-800/80 hover:bg-gray-200 transition" >
+                                Add to Cart
+                            </button>
+                            <button onClick={()=> {addToCart(product._id); navigate("/cart")}} className="w-full py-3.5 cursor-pointer font-medium bg-primary text-white hover:bg-primary-dull transition" >
+                                Buy now
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="mt-10">
+                            <button disabled className="w-full py-3.5 font-medium bg-red-100 text-red-600 rounded cursor-not-allowed">
+                                Out of Stock
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
             {/* ---------- related products -------------- */}

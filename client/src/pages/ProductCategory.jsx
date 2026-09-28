@@ -11,7 +11,7 @@ const ProductCategory = () => {
 
     const searchCategory = categories.find((item)=> item.path.toLowerCase() === category)
 
-    const filteredProducts = products.filter((product)=>product.category.toLowerCase() === category)
+    const filteredProducts = products.filter((product)=>product.category.toLowerCase() === category && product.inStock)
 
   return (
     <div className='mt-16'>
