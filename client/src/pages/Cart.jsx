@@ -33,13 +33,49 @@ const Cart = () => {
             if (data.success){
                 setAddresses(data.addresses)
                 if(data.addresses.length > 0){
-                    setSelectedAddress(data.addresses[0])
+                    setSelectedAddress(prev => {
+                        if (!prev) return data.addresses[0];
+                        const stillExists = data.addresses.find(a => a._id === prev._id);
+                        return stillExists || data.addresses[0];
+                    });
+                } else {
+                    setSelectedAddress(null);
                 }
             }
         } catch (error) {
             console.log(error.message)
         }
     }
+
+    const handleRemoveAddress = async (addressId) => {
+        try {
+            const storedToken = localStorage.getItem('token');
+            const { data } = await axios.post('/api/address/remove', {
+                addressId,
+                token: storedToken,
+                email: user?.email
+            }, {
+                headers: {
+                    token: storedToken,
+                    Authorization: `Bearer ${storedToken}`
+                }
+            });
+
+            if (data.success) {
+                toast.success(data.message || "Address removed successfully");
+                const updated = addresses.filter(item => item._id !== addressId);
+                setAddresses(updated);
+
+                if (selectedAddress?._id === addressId) {
+                    setSelectedAddress(updated.length > 0 ? updated[0] : null);
+                }
+            } else {
+                toast.error(data.message || "Failed to remove address");
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    };
 
     const placeOrder = async ()=>{
         try {
@@ -159,33 +195,122 @@ const Cart = () => {
                 <hr className="border-gray-300 my-5" />
 
                 <div className="mb-6">
-                    <p className="text-sm font-medium uppercase">Delivery Address</p>
-                    <div className="relative flex justify-between items-start mt-2">
-                        <p className="text-gray-500">{selectedAddress ? `${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country}` : "No address found"}</p>
-                        <button onClick={() => setShowAddress(!showAddress)} className="text-primary hover:underline cursor-pointer">
-                            Change
+                    <div className="flex justify-between items-center mb-2">
+                        <p className="text-sm font-medium uppercase text-gray-700">Delivery Address</p>
+                        <button 
+                            onClick={() => setShowAddress(!showAddress)} 
+                            className="text-primary text-sm font-semibold hover:underline cursor-pointer"
+                        >
+                            {showAddress ? "Close" : "Change"}
                         </button>
-                        {showAddress && (
-                            <div className="absolute top-12 py-1 bg-white border border-gray-300 text-sm w-full z-20">
-                               {addresses.map((address, index)=>(
-                                <p key={index} onClick={() => {setSelectedAddress(address); setShowAddress(false)}} className="text-gray-500 p-2 hover:bg-gray-100 cursor-pointer">
-                                    {address.street}, {address.city}, {address.state}, {address.country}
-                                </p>
-                            )) }
-                                <p onClick={() => {
+                    </div>
+
+                    {selectedAddress ? (
+                        <div className="p-3 border border-gray-200 rounded bg-white text-sm relative">
+                            <p className="font-semibold text-gray-800">{selectedAddress.firstName} {selectedAddress.lastName}</p>
+                            <p className="text-gray-600 mt-0.5 leading-snug">
+                                {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.country} - {selectedAddress.zipcode}
+                            </p>
+                            {selectedAddress.phone && (
+                                <p className="text-gray-500 text-xs mt-1">📞 {selectedAddress.phone}</p>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-gray-500 text-sm italic bg-white p-3 border border-gray-200 rounded">No address selected</p>
+                    )}
+
+                    {showAddress && (
+                        <div className="mt-3 p-3 bg-white border border-gray-300 rounded-lg shadow-xl text-sm space-y-3 z-30 relative">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Select Delivery Address</p>
+                            
+                            {addresses.length === 0 ? (
+                                <p className="text-gray-500 text-xs py-1">No saved addresses found.</p>
+                            ) : (
+                                <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+                                    {addresses.map((address) => {
+                                        const isSelected = selectedAddress?._id === address._id;
+                                        return (
+                                            <div 
+                                                key={address._id} 
+                                                className={`flex items-start justify-between p-2.5 rounded-md border transition cursor-pointer ${
+                                                    isSelected ? 'border-primary bg-primary/5 shadow-xs' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                }`}
+                                                onClick={() => {
+                                                    setSelectedAddress(address);
+                                                    setShowAddress(false);
+                                                }}
+                                            >
+                                                <div className="flex-1 pr-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <input 
+                                                            type="radio" 
+                                                            name="delivery_address" 
+                                                            checked={isSelected} 
+                                                            onChange={() => {
+                                                                setSelectedAddress(address);
+                                                                setShowAddress(false);
+                                                            }}
+                                                            className="accent-primary cursor-pointer"
+                                                        />
+                                                        <p className="font-medium text-gray-800 text-xs md:text-sm">
+                                                            {address.firstName} {address.lastName}
+                                                        </p>
+                                                        {isSelected && (
+                                                            <span className="text-[10px] bg-primary/20 text-primary font-semibold px-1.5 py-0.5 rounded">Selected</span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-gray-600 text-xs mt-1 pl-5 leading-snug">
+                                                        {address.street}, {address.city}, {address.state}, {address.country} - {address.zipcode}
+                                                    </p>
+                                                    {address.phone && (
+                                                        <p className="text-gray-500 text-[11px] mt-0.5 pl-5">
+                                                            Phone: {address.phone}
+                                                        </p>
+                                                    )}
+                                                </div>
+
+                                                {/* Action Buttons: Edit and Delete (Cross Icon) */}
+                                                <div className="flex items-center gap-1 mt-0.5" onClick={(e) => e.stopPropagation()}>
+                                                    <button 
+                                                        onClick={() => {
+                                                            setShowAddress(false);
+                                                            navigate('/add-address', { state: { addressToEdit: address } });
+                                                        }}
+                                                        className="text-xs font-semibold text-primary hover:underline px-1 py-0.5 cursor-pointer"
+                                                        title="Update / Edit Address"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => handleRemoveAddress(address._id)}
+                                                        className="p-1 hover:bg-red-50 rounded transition cursor-pointer"
+                                                        title="Remove Address"
+                                                    >
+                                                        <img src={assets.remove_icon} alt="Remove" className="w-5 h-5 hover:scale-110 transition" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+
+                            <button 
+                                onClick={() => {
                                     setShowAddress(false);
-                                    if(!user){
+                                    if (!user) {
                                         setShowUserLogin(true);
                                         toast.error("Please login to add address");
                                     } else {
                                         navigate("/add-address");
                                     }
-                                }} className="text-primary text-center cursor-pointer p-2 hover:bg-primary/10">
-                                    Add address
-                                </p>
-                            </div>
-                        )}
-                    </div>
+                                }} 
+                                className="w-full text-center text-primary font-semibold text-sm py-2 px-3 border border-dashed border-primary rounded-md hover:bg-primary/5 transition cursor-pointer flex items-center justify-center gap-1 mt-2"
+                            >
+                                + Add New Address
+                            </button>
+                        </div>
+                    )}
 
                     <p className="text-sm font-medium uppercase mt-6">Payment Method</p>
 

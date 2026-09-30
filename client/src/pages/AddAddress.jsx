@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
@@ -10,7 +11,7 @@ const InputField = ({ type, placeholder, name, handleChange, address })=>(
     placeholder={placeholder}
     onChange={handleChange}
     name={name}
-    value={address[name]}
+    value={address[name] || ''}
     required
      />
 )
@@ -18,6 +19,8 @@ const InputField = ({ type, placeholder, name, handleChange, address })=>(
 const AddAddress = () => {
 
     const {axios, user, navigate, setShowUserLogin} = useAppContext();
+    const location = useLocation();
+    const addressToEdit = location.state?.addressToEdit;
 
     const [address, setAddress] = useState({
         firstName: '',
@@ -31,6 +34,22 @@ const AddAddress = () => {
         phone: '',
     })
 
+    useEffect(() => {
+        if (addressToEdit) {
+            setAddress({
+                firstName: addressToEdit.firstName || '',
+                lastName: addressToEdit.lastName || '',
+                email: addressToEdit.email || '',
+                street: addressToEdit.street || '',
+                city: addressToEdit.city || '',
+                state: addressToEdit.state || '',
+                zipcode: addressToEdit.zipcode || '',
+                country: addressToEdit.country || '',
+                phone: addressToEdit.phone || '',
+            });
+        }
+    }, [addressToEdit]);
+
     const handleChange = (e)=>{
         const { name, value } = e.target;
 
@@ -40,8 +59,6 @@ const AddAddress = () => {
         }))
     }
 
-
-
     const onSubmitHandler = async (e)=>{
         e.preventDefault();
         try {
@@ -50,11 +67,14 @@ const AddAddress = () => {
                 ...address,
                 email: address.email || user?.email || ""
             };
-            const {data} = await axios.post('/api/address/add', {
-                address: addressData,
-                token: storedToken,
-                userId: user?._id
-            }, {
+
+            const isEdit = Boolean(addressToEdit?._id);
+            const endpoint = isEdit ? '/api/address/update' : '/api/address/add';
+            const payload = isEdit 
+                ? { addressId: addressToEdit._id, address: addressData, token: storedToken, userId: user?._id }
+                : { address: addressData, token: storedToken, userId: user?._id };
+
+            const {data} = await axios.post(endpoint, payload, {
                 headers: {
                     token: storedToken,
                     Authorization: `Bearer ${storedToken}`
@@ -62,8 +82,8 @@ const AddAddress = () => {
             });
 
             if (data.success){
-                toast.success(data.message)
-                navigate('/cart')
+                toast.success(data.message || (isEdit ? "Address updated successfully" : "Address added successfully"));
+                navigate('/cart');
             }else{
                 toast.error(data.message || "Failed to save address");
             }
@@ -82,7 +102,12 @@ const AddAddress = () => {
 
   return (
     <div className='mt-16 pb-16'>
-      <p className='text-2xl md:text-3xl text-gray-500'>Add Shipping <span className='font-semibold text-primary'>Address</span></p>
+      <div className='flex items-center justify-between'>
+        <p className='text-2xl md:text-3xl text-gray-500'>{addressToEdit ? "Update" : "Add"} Shipping <span className='font-semibold text-primary'>Address</span></p>
+        <button onClick={() => navigate('/cart')} className='text-sm text-primary font-medium hover:underline cursor-pointer'>
+            &larr; Back to Cart
+        </button>
+      </div>
       <div className='flex flex-col-reverse md:flex-row justify-between mt-10'>
             <div className='flex-1 max-w-md'>
              <form onSubmit={onSubmitHandler} className='space-y-3 mt-6 text-sm'>
@@ -107,8 +132,8 @@ const AddAddress = () => {
 
                 <InputField handleChange={handleChange} address={address} name='phone' type="text" placeholder="Phone" />
 
-                <button className='w-full mt-6 bg-primary text-white py-3 hover:bg-primary-dull transition cursor-pointer uppercase'>
-                    Save address
+                <button className='w-full mt-6 bg-primary text-white py-3 hover:bg-primary-dull transition cursor-pointer uppercase font-medium'>
+                    {addressToEdit ? "Update Address" : "Save Address"}
                 </button>
 
 
@@ -121,3 +146,4 @@ const AddAddress = () => {
 }
 
 export default AddAddress
+
