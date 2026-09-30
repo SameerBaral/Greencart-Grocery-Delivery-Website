@@ -47,8 +47,20 @@ const AddAddress = () => {
                 country: addressToEdit.country || '',
                 phone: addressToEdit.phone || '',
             });
+        } else if (user) {
+            const nameParts = user.name ? user.name.trim().split(" ") : [];
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(" ") || '';
+            const email = user.email || '';
+
+            setAddress(prev => ({
+                ...prev,
+                firstName: prev.firstName || firstName,
+                lastName: prev.lastName || lastName,
+                email: prev.email || email
+            }));
         }
-    }, [addressToEdit]);
+    }, [addressToEdit, user]);
 
     const handleChange = (e)=>{
         const { name, value } = e.target;
