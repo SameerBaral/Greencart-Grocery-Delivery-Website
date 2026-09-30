@@ -20,6 +20,13 @@
   - **Cash on Delivery (COD)**: Quick one-click order placement.
 - 📦 **Order Tracking**: View order history, status updates, total amounts, and item details under "My Orders".
 
+### 💳 Online Payment Testing (Stripe Test Credentials)
+To test **Online Payment** checkout via Stripe, use these test card credentials on the Stripe hosted payment screen:
+- **Card Number**: `4242 4242 4242 4242`
+- **Expiration Date**: Any future date (e.g. `12/34` or `09/28`)
+- **CVC / CVV**: Any 3 digits (e.g. `123`)
+- **ZIP Code**: Any 5 digits (e.g. `12345`)
+
 ### 🏪 Seller / Admin Dashboard
 - 📊 **Dashboard Overview**: Access seller portal with dedicated auth credentials.
 - ➕ **Product Management**: Add new products with image uploading via **Cloudinary**, category tags, and pricing.
