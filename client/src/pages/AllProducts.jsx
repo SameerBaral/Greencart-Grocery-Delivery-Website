@@ -16,7 +16,7 @@ const AllProducts = () => {
             }
     },[products, searchQuery])
 
-    const visibleProducts = filteredProducts.filter((product) => product.inStock);
+    const visibleProducts = [...filteredProducts].sort((a, b) => (b.inStock ? 1 : 0) - (a.inStock ? 1 : 0));
 
   return (
     <div className='mt-16 flex flex-col'>

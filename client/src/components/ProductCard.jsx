@@ -10,11 +10,20 @@ const ProductCard = ({product}) => {
             // className="border border-gray-500/20 rounded-md md:px-4 px-3 py-2 bg-white min-w-50 max-w-50 w-full">
 
    
+    const isInStock = product.inStock !== false;
+
     return product && (
         <div onClick={()=> {navigate(`/products/${product.category.toLowerCase()}/${product._id}`); scrollTo(0,0)}} 
-            className="border border-gray-500/20 rounded-md md:px-4 px-3 py-2 bg-white  w-full">
+            className="relative border border-gray-500/20 rounded-md md:px-4 px-3 py-2 bg-white w-full hover:shadow-md transition">
+            
+            {!isInStock && (
+                <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow z-10 uppercase tracking-wide">
+                    Out of Stock
+                </span>
+            )}
+
             <div className="group cursor-pointer flex items-center justify-center px-2">
-                <img className="group-hover:scale-105 transition max-w-26 md:max-w-36" src={product.image[0]} alt={product.name} />
+                <img className={`group-hover:scale-105 transition max-w-26 md:max-w-36 ${!isInStock ? 'opacity-60 grayscale-[20%]' : ''}`} src={product.image[0]} alt={product.name} />
             </div>
             <div className="text-gray-500/60 text-sm">
                 <p>{product.category}</p>
@@ -30,7 +39,11 @@ const ProductCard = ({product}) => {
                         {currency}{product.offerPrice}{" "} <span className="text-gray-500/60 md:text-sm text-xs line-through">{currency}{product.price}</span>
                     </p>
                     <div onClick={(e) => { e.stopPropagation(); }} className="text-primary">
-                        {!cartItems[product._id] ? (
+                        {!isInStock ? (
+                            <button disabled className="bg-red-50 text-red-600 border border-red-200 text-xs px-2 py-1.5 rounded font-semibold cursor-not-allowed select-none">
+                                Out of Stock
+                            </button>
+                        ) : !cartItems[product._id] ? (
                             <button className="flex items-center justify-center gap-1 bg-primary/10 border border-primary/40 md:w-[80px] w-[64px] h-[34px] rounded cursor-pointer" onClick={() => addToCart(product._id)} >
                                 <img src={assets.cart_icon} alt="cart_icon"/>
                                 Add

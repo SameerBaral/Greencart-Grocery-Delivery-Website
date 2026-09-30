@@ -11,7 +11,9 @@ const ProductCategory = () => {
 
     const searchCategory = categories.find((item)=> item.path.toLowerCase() === category)
 
-    const filteredProducts = products.filter((product)=>product.category.toLowerCase() === category && product.inStock)
+    const filteredProducts = products
+        .filter((product) => product.category.toLowerCase() === category)
+        .sort((a, b) => (b.inStock ? 1 : 0) - (a.inStock ? 1 : 0));
 
   return (
     <div className='mt-16'>
