@@ -25,7 +25,7 @@ To test **Online Payment** checkout via Stripe, use these test card credentials 
 - **Card Number**: `4242 4242 4242 4242`
 - **Expiration Date**: Any future date (e.g. `12/34` or `09/28`)
 - **CVC / CVV**: Any 3 digits (e.g. `123`)
-- **ZIP Code**: Any 5 digits (e.g. `12345`)
+
 
 ### 🏪 Seller / Admin Dashboard
 - 📊 **Dashboard Overview**: Access seller portal with dedicated auth credentials.
