@@ -46,6 +46,7 @@ export const AppContextProvider = ({children})=>{
         }
     })
     const [isSeller, setIsSeller] = useState(false)
+    const [isSellerLoading, setIsSellerLoading] = useState(true)
     const [showUserLogin, setShowUserLogin] = useState(false)
     const [products, setProducts] = useState([])
 
@@ -99,6 +100,8 @@ export const AppContextProvider = ({children})=>{
         }
     } catch (error) {
         setIsSeller(false)
+    } finally {
+        setIsSellerLoading(false)
     }
   }
 
@@ -129,16 +132,16 @@ const fetchUser = async ()=>{
 
 
     // Fetch All Products
-    const fetchProducts = async ()=>{
+    const fetchProducts = async (silent = false)=>{
         try {
             const { data } = await axios.get('/api/product/list')
             if(data.success){
                 setProducts(data.products)
-            }else{
+            }else if(!silent){
                 toast.error(data.message)
             }
         } catch (error) {
-            toast.error(error.message)
+            if(!silent) toast.error(error.message)
         }
     }
 
@@ -205,6 +208,26 @@ const getCartAmount = () =>{
         fetchUser()
         fetchSeller()
         fetchProducts()
+
+        // Background auto-polling for real-time product updates (every 4 seconds)
+        const productInterval = setInterval(() => {
+            fetchProducts(true);
+        }, 4000);
+
+        const handleProductRefetch = () => {
+            fetchProducts(true);
+        };
+
+        window.addEventListener('focus', handleProductRefetch);
+        window.addEventListener('visibilitychange', handleProductRefetch);
+        window.addEventListener('products-updated', handleProductRefetch);
+
+        return () => {
+            clearInterval(productInterval);
+            window.removeEventListener('focus', handleProductRefetch);
+            window.removeEventListener('visibilitychange', handleProductRefetch);
+            window.removeEventListener('products-updated', handleProductRefetch);
+        };
     },[])
 
     // Update Database Cart Items
@@ -248,7 +271,7 @@ const getCartAmount = () =>{
         } catch (e) {}
     }
 
-    const value = {navigate, user, setUser, token, setToken, setIsSeller, isSeller,
+    const value = {navigate, user, setUser, token, setToken, setIsSeller, isSeller, isSellerLoading, setIsSellerLoading,
         showUserLogin, setShowUserLogin, products, currency, addToCart, updateCartItem, removeFromCart, cartItems, searchQuery, setSearchQuery, getCartAmount, getCartCount, axios, fetchProducts, setCartItems, logout
     }
 

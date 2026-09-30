@@ -8,16 +8,18 @@ const Orders = () => {
     const [orders, setOrders] = useState([])
     const [statusFilter, setStatusFilter] = useState('All')
 
-    const fetchOrders = async () =>{
+    const fetchOrders = async (silent = false) => {
         try {
             const { data } = await axios.get('/api/order/seller');
-            if(data.success){
-                setOrders(data.orders)
-            }else{
-                toast.error(data.message)
+            if (data.success) {
+                setOrders(data.orders);
+            } else if (!silent) {
+                toast.error(data.message);
             }
         } catch (error) {
-            toast.error(error.message)
+            if (!silent) {
+                toast.error(error.message);
+            }
         }
     };
 
@@ -36,6 +38,7 @@ const Orders = () => {
                     }
                     return order;
                 }));
+                window.dispatchEvent(new CustomEvent('order-updated'));
             } else {
                 toast.error(data.message);
             }
@@ -44,9 +47,29 @@ const Orders = () => {
         }
     };
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchOrders();
-    },[])
+
+        // Auto-refresh orders every 3 seconds for real-time updates
+        const interval = setInterval(() => {
+            fetchOrders(true);
+        }, 3000);
+
+        const handleRefetch = () => {
+            fetchOrders(true);
+        };
+
+        window.addEventListener('focus', handleRefetch);
+        window.addEventListener('visibilitychange', handleRefetch);
+        window.addEventListener('order-updated', handleRefetch);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('focus', handleRefetch);
+            window.removeEventListener('visibilitychange', handleRefetch);
+            window.removeEventListener('order-updated', handleRefetch);
+        };
+    }, []);
 
     // Stat calculations
     const totalOrdersCount = orders.length;

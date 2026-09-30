@@ -95,6 +95,7 @@ const UpdateProduct = () => {
             if (data.success) {
                 toast.success(data.message || 'Product Updated Successfully!');
                 await fetchProducts();
+                window.dispatchEvent(new CustomEvent('products-updated'));
                 navigate('/seller/product-list');
             } else {
                 toast.error(data.message);

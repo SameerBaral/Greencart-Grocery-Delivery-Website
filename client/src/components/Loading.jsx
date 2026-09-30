@@ -18,6 +18,7 @@ const Loading = () => {
             if (data.success) {
                 toast.success(data.message)
                 setCartItems({})
+                window.dispatchEvent(new CustomEvent('order-updated'))
                 navigate('/my-orders')
             } else {
                 toast.error(data.message)

@@ -23,7 +23,7 @@ import Loading from './components/Loading';
 const App = () => {
 
   const isSellerPath = useLocation().pathname.includes("seller");
-  const {showUserLogin, isSeller} = useAppContext()
+  const {showUserLogin, isSeller, isSellerLoading} = useAppContext()
 
   return (
     <div className='text-default min-h-screen text-gray-700 bg-white'>
@@ -43,7 +43,17 @@ const App = () => {
           <Route path='/add-address' element={<AddAddress/>} />
           <Route path='/my-orders' element={<MyOrders/>} />
           <Route path='/loader' element={<Loading/>} />
-          <Route path='/seller' element={isSeller ? <SellerLayout/> : <SellerLogin/>}>
+          <Route path='/seller' element={
+            isSellerLoading ? (
+              <div className='min-h-screen flex justify-center items-center bg-white'>
+                <div className='animate-spin rounded-full h-16 w-16 border-4 border-gray-200 border-t-primary'></div>
+              </div>
+            ) : isSeller ? (
+              <SellerLayout/>
+            ) : (
+              <SellerLogin/>
+            )
+          }>
             <Route index element={isSeller ? <AddProduct/> : null} />
             <Route path='product-list' element={<ProductList/>} />
             <Route path='update-product/:id' element={<UpdateProduct/>} />

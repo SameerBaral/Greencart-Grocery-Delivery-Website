@@ -10,6 +10,7 @@ const ProductList = () => {
             const { data } = await axios.post('/api/product/stock', {id, inStock});
             if (data.success){
                 fetchProducts();
+                window.dispatchEvent(new CustomEvent('products-updated'));
                 toast.success(data.message)
             }else{
                 toast.error(data.message)

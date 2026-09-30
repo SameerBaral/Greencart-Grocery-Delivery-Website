@@ -12,7 +12,7 @@ const AddProduct = () => {
     const [price, setPrice] = useState('');
     const [offerPrice, setOfferPrice] = useState('');
 
-    const {axios} = useAppContext()
+    const {axios, fetchProducts} = useAppContext()
 
     const onSubmitHandler = async (event) => {
         try {
@@ -37,11 +37,13 @@ const AddProduct = () => {
             if (data.success){
                 toast.success(data.message);
                 setName('');
-                setDescription('')
-                setCategory('')
-                setPrice('')
-                setOfferPrice('')
-                setFiles([])
+                setDescription('');
+                setCategory('');
+                setPrice('');
+                setOfferPrice('');
+                setFiles([]);
+                fetchProducts();
+                window.dispatchEvent(new CustomEvent('products-updated'));
             }else{
                 toast.error(data.message)
             }

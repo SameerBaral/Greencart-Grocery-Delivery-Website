@@ -8,14 +8,14 @@ const MyOrders = () => {
     const [selectedItems, setSelectedItems] = useState({}) // { orderId: [itemId1, itemId2] }
     const {currency, axios, user} = useAppContext()
 
-    const fetchMyOrders = async ()=>{
+    const fetchMyOrders = async () => {
         try {
             const storedToken = localStorage.getItem('token');
             const { data } = await axios.get('/api/order/user', {
                 params: { email: user?.email },
                 headers: { token: storedToken, Authorization: `Bearer ${storedToken}` }
             })
-            if(data.success){
+            if (data.success) {
                 setMyOrders(data.orders)
             }
         } catch (error) {
@@ -34,6 +34,7 @@ const MyOrders = () => {
             if (data.success) {
                 toast.success(data.message);
                 fetchMyOrders();
+                window.dispatchEvent(new CustomEvent('order-updated'));
             } else {
                 toast.error(data.message);
             }
@@ -53,6 +54,7 @@ const MyOrders = () => {
             if (data.success) {
                 toast.success(data.message);
                 fetchMyOrders();
+                window.dispatchEvent(new CustomEvent('order-updated'));
             } else {
                 toast.error(data.message);
             }
@@ -75,6 +77,7 @@ const MyOrders = () => {
                 toast.success(data.message);
                 setSelectedItems(prev => ({ ...prev, [orderId]: [] }));
                 fetchMyOrders();
+                window.dispatchEvent(new CustomEvent('order-updated'));
             } else {
                 toast.error(data.message);
             }
@@ -94,11 +97,30 @@ const MyOrders = () => {
         });
     };
 
-    useEffect(()=>{
-        if(user){
-            fetchMyOrders()
+    useEffect(() => {
+        if (user) {
+            fetchMyOrders();
+
+            const interval = setInterval(() => {
+                fetchMyOrders();
+            }, 3000);
+
+            const handleRefetch = () => {
+                fetchMyOrders();
+            };
+
+            window.addEventListener('focus', handleRefetch);
+            window.addEventListener('visibilitychange', handleRefetch);
+            window.addEventListener('order-updated', handleRefetch);
+
+            return () => {
+                clearInterval(interval);
+                window.removeEventListener('focus', handleRefetch);
+                window.removeEventListener('visibilitychange', handleRefetch);
+                window.removeEventListener('order-updated', handleRefetch);
+            };
         }
-    },[user])
+    }, [user]);
 
     return (
     <div className='mt-16 pb-16 min-h-[50vh]'>
