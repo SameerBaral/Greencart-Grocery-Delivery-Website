@@ -5,14 +5,14 @@ import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
 
 // Input Field Component
-const InputField = ({ type, placeholder, name, handleChange, address })=>(
+const InputField = ({ type, placeholder, name, handleChange, address, required = true })=>(
     <input className='w-full px-2 py-2.5 border border-gray-500/30 rounded outline-none text-gray-500 focus:border-primary transition'
     type={type}
     placeholder={placeholder}
     onChange={handleChange}
     name={name}
     value={address[name] || ''}
-    required
+    required={required}
      />
 )
 
@@ -126,7 +126,7 @@ const AddAddress = () => {
 
                 <div className='grid grid-cols-2 gap-4'>
                     <InputField handleChange={handleChange} address={address} name='firstName' type="text" placeholder="First Name"/>
-                    <InputField handleChange={handleChange} address={address} name='lastName' type="text" placeholder="Last Name"/>
+                    <InputField handleChange={handleChange} address={address} name='lastName' type="text" placeholder="Last Name (Optional)" required={false}/>
                 </div>
 
                 <InputField handleChange={handleChange} address={address} name='email' type="email" placeholder="Email address" />
