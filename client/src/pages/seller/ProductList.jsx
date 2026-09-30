@@ -19,6 +19,23 @@ const ProductList = () => {
             toast.error(error.message)
         }
     }
+
+    const handleDeleteProduct = async (id, name) => {
+        if (!window.confirm(`Are you sure you want to delete "${name || 'this product'}" permanently?`)) return;
+        try {
+            const { data } = await axios.post('/api/product/delete', { id });
+            if (data.success) {
+                toast.success(data.message || "Product Deleted");
+                fetchProducts();
+                window.dispatchEvent(new CustomEvent('products-updated'));
+            } else {
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    }
+
   return (
     <div className="no-scrollbar flex-1 h-[95vh] overflow-y-scroll flex flex-col justify-between">
             <div className="w-full md:p-10 p-4">
@@ -56,12 +73,20 @@ const ProductList = () => {
                                         </label>
                                     </td>
                                     <td className="px-4 py-3 text-center">
-                                        <button 
-                                            onClick={() => navigate(`/seller/update-product/${product._id}`)}
-                                            className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white rounded text-xs font-medium cursor-pointer transition shadow-xs"
-                                        >
-                                            Edit / Update
-                                        </button>
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button 
+                                                onClick={() => navigate(`/seller/update-product/${product._id}`)}
+                                                className="px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white rounded text-xs font-medium cursor-pointer transition shadow-xs"
+                                            >
+                                                Update
+                                            </button>
+                                            <button 
+                                                onClick={() => handleDeleteProduct(product._id, product.name)}
+                                                className="px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 hover:bg-red-600 hover:text-white rounded text-xs font-medium cursor-pointer transition shadow-xs"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -114,3 +114,19 @@ export const updateProduct = async (req, res)=>{
     }
 }
 
+// Delete Product : /api/product/delete
+export const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!id) {
+            return res.json({ success: false, message: "Product ID is required" });
+        }
+        await Product.findByIdAndDelete(id);
+        res.json({ success: true, message: "Product Deleted Successfully" });
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+
