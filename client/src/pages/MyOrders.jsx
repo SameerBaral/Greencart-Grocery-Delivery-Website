@@ -148,12 +148,16 @@ const MyOrders = () => {
                             <span className={`ml-2 text-xs px-2 py-0.5 rounded font-bold ${
                                 order.isRefunded || (order.paymentType === 'Online' && isEntireOrderCancelled)
                                     ? 'bg-red-100 text-red-700'
+                                    : isEntireOrderCancelled
+                                    ? 'bg-gray-100 text-gray-600'
                                     : order.isPaid
                                     ? 'bg-green-100 text-green-700'
                                     : 'bg-amber-100 text-amber-700'
                             }`}>
                                 {order.isRefunded || (order.paymentType === 'Online' && isEntireOrderCancelled)
                                     ? "Refunded"
+                                    : isEntireOrderCancelled
+                                    ? "Cancelled"
                                     : order.isPaid
                                     ? "Paid ✓"
                                     : "Pending"}

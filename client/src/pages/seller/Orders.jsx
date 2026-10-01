@@ -291,12 +291,16 @@ const Orders = () => {
                                         <span className={
                                             order.isRefunded || (order.paymentType === 'Online' && (order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))))
                                                 ? "text-red-600 font-bold"
+                                                : (order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled')))
+                                                ? "text-slate-500 font-medium"
                                                 : order.isPaid
                                                 ? "text-green-600 font-bold"
                                                 : "text-amber-600 font-bold"
                                         }>
                                             {order.isRefunded || (order.paymentType === 'Online' && (order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))))
                                                 ? "Refunded"
+                                                : (order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled')))
+                                                ? "Cancelled"
                                                 : order.isPaid
                                                 ? "Paid ✓"
                                                 : "Pending"}
