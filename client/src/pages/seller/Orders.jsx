@@ -79,9 +79,12 @@ const Orders = () => {
         order.status === 'Cancelled' || (order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))
     ).length;
 
-    // Total earnings from Delivered or Paid orders
+    // Total earnings from Delivered or Paid orders (excluding cancelled orders)
     const totalEarnings = orders
-        .filter(order => order.status === 'Delivered' || order.isPaid)
+        .filter(order => {
+            const isCancelled = order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'));
+            return !isCancelled && (order.status === 'Delivered' || order.isPaid);
+        })
         .reduce((acc, order) => acc + (order.amount || 0), 0);
 
     // Calculate order count per user account for Repeat Customer badge
@@ -285,8 +288,18 @@ const Orders = () => {
                                     <p><span className="font-medium text-gray-800">Method:</span> {order.paymentType}</p>
                                     <p>
                                         <span className="font-medium text-gray-800">Payment:</span>{" "}
-                                        <span className={order.isPaid ? "text-green-600 font-bold" : "text-amber-600 font-bold"}>
-                                            {order.isPaid ? "Paid ✓" : "Pending"}
+                                        <span className={
+                                            order.isRefunded || (order.paymentType === 'Online' && (order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))))
+                                                ? "text-red-600 font-bold"
+                                                : order.isPaid
+                                                ? "text-green-600 font-bold"
+                                                : "text-amber-600 font-bold"
+                                        }>
+                                            {order.isRefunded || (order.paymentType === 'Online' && (order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))))
+                                                ? "Refunded"
+                                                : order.isPaid
+                                                ? "Paid ✓"
+                                                : "Pending"}
                                         </span>
                                     </p>
                                 </div>

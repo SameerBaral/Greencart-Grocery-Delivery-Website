@@ -240,6 +240,10 @@ export const cancelOrder = async (req, res) => {
             item.status = "Cancelled";
         });
 
+        if (order.paymentType === "Online" && order.isPaid) {
+            order.isRefunded = true;
+        }
+
         await order.save();
         return res.json({ success: true, message: "Entire order cancelled successfully" });
     } catch (error) {
@@ -297,6 +301,9 @@ export const cancelOrderItem = async (req, res) => {
         if (activeItems.length === 0) {
             order.status = "Cancelled";
             order.amount = 0;
+            if (order.paymentType === "Online" && order.isPaid) {
+                order.isRefunded = true;
+            }
         } else {
             // Query products separately to calculate subtotal for remaining active items
             const activeProductIds = activeItems.map(item => item.product);

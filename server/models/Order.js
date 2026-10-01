@@ -12,6 +12,7 @@ const orderSchema = new mongoose.Schema({
     status: {type: String, default: 'Order Placed'},
     paymentType: {type: String, required: true},
     isPaid: {type: Boolean, required: true, default: false},
+    isRefunded: {type: Boolean, default: false},
     date: {type: Number, default: Date.now},
     orderTime: {
         type: String,
