@@ -196,6 +196,26 @@ export const updateOrderStatus = async (req, res) => {
             return res.json({ success: false, message: "Order not found" });
         }
 
+        // Prevent modifying an order that is already in a terminal state (Delivered or Cancelled)
+        if (order.status === "Cancelled") {
+            return res.json({ success: false, message: "Cannot modify status of a cancelled order" });
+        }
+        if (order.status === "Delivered") {
+            return res.json({ success: false, message: "Cannot modify status of a delivered order" });
+        }
+
+        // Enforce sequential status progression
+        const allowedTransitions = {
+            "Order Placed": ["Packing", "Cancelled"],
+            "Packing": ["Out for Delivery", "Cancelled"],
+            "Out for Delivery": ["Delivered", "Cancelled"]
+        };
+
+        const allowed = allowedTransitions[order.status];
+        if (allowed && !allowed.includes(status)) {
+            return res.json({ success: false, message: `Invalid transition from "${order.status}" to "${status}"` });
+        }
+
         order.status = status;
         if (status === "Delivered") {
             order.isPaid = true;

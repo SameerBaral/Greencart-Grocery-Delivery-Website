@@ -309,26 +309,44 @@ const Orders = () => {
                                 </div>
 
                                 {/* Status Change Dropdown */}
-                                <div className="flex flex-col gap-1 my-auto min-w-[140px]">
-                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</label>
-                                    <select 
-                                        value={order.status || "Order Placed"}
-                                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                                        className={`p-2 text-sm font-medium border rounded-md outline-none cursor-pointer ${
-                                            order.status === 'Delivered' ? 'bg-green-50 border-green-400 text-green-700 font-bold' :
-                                            order.status === 'Cancelled' ? 'bg-red-50 border-red-400 text-red-700 font-bold' :
-                                            order.status === 'Out for Delivery' ? 'bg-blue-50 border-blue-400 text-blue-700 font-bold' :
-                                            order.status === 'Packing' ? 'bg-amber-50 border-amber-400 text-amber-700 font-bold' :
-                                            'bg-gray-50 border-gray-300 text-gray-800'
-                                        }`}
-                                    >
-                                        <option value="Order Placed">Order Placed</option>
-                                        <option value="Packing">Packing</option>
-                                        <option value="Out for Delivery">Out for Delivery</option>
-                                        <option value="Delivered">Delivered</option>
-                                        <option value="Cancelled">Cancelled</option>
-                                    </select>
-                                </div>
+                                {(() => {
+                                    const isTerminalState = order.status === 'Delivered' || order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'));
+
+                                    let allowedOptions = [];
+                                    if (order.status === 'Order Placed') {
+                                        allowedOptions = ['Order Placed', 'Packing', 'Cancelled'];
+                                    } else if (order.status === 'Packing') {
+                                        allowedOptions = ['Packing', 'Out for Delivery', 'Cancelled'];
+                                    } else if (order.status === 'Out for Delivery') {
+                                        allowedOptions = ['Out for Delivery', 'Delivered', 'Cancelled'];
+                                    } else {
+                                        allowedOptions = [order.status || 'Order Placed'];
+                                    }
+
+                                    return (
+                                        <div className="flex flex-col gap-1 my-auto min-w-[140px]">
+                                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</label>
+                                            <select 
+                                                value={order.status || "Order Placed"}
+                                                disabled={isTerminalState}
+                                                onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                                                className={`p-2 text-sm font-medium border rounded-md outline-none ${
+                                                    isTerminalState ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+                                                } ${
+                                                    order.status === 'Delivered' ? 'bg-green-50 border-green-400 text-green-700 font-bold' :
+                                                    order.status === 'Cancelled' ? 'bg-red-50 border-red-400 text-red-700 font-bold' :
+                                                    order.status === 'Out for Delivery' ? 'bg-blue-50 border-blue-400 text-blue-700 font-bold' :
+                                                    order.status === 'Packing' ? 'bg-amber-50 border-amber-400 text-amber-700 font-bold' :
+                                                    'bg-gray-50 border-gray-300 text-gray-800'
+                                                }`}
+                                            >
+                                                {allowedOptions.map(opt => (
+                                                    <option key={opt} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    );
+                                })()}
 
                             </div>
                         </div>
