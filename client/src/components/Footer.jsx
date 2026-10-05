@@ -1,4 +1,5 @@
 import { assets, footerLinks } from "../assets/assets";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
 
@@ -18,7 +19,11 @@ const Footer = () => {
                             <ul className="text-sm space-y-1">
                                 {section.links.map((link, i) => (
                                     <li key={i}>
-                                        <a href={link.url} className="hover:underline transition">{link.text}</a>
+                                        {link.url.startsWith('/') ? (
+                                            <Link to={link.url} className="hover:underline transition">{link.text}</Link>
+                                        ) : (
+                                            <a href={link.url} className="hover:underline transition">{link.text}</a>
+                                        )}
                                     </li>
                                 ))}
                             </ul>
