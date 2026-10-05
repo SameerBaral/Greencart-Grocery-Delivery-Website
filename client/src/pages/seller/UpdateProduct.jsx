@@ -73,6 +73,19 @@ const UpdateProduct = () => {
                 }
             });
 
+            const hasExisting = existingImages.some(img => typeof img === 'string' && img.trim() !== '');
+            const hasNew = filesToUpload.length > 0;
+
+            if (!hasExisting && !hasNew) {
+                toast.error("Please upload at least one product image");
+                return;
+            }
+
+            if (!category) {
+                toast.error("Please select a category");
+                return;
+            }
+
             const productData = {
                 id,
                 name,
@@ -182,6 +195,7 @@ const UpdateProduct = () => {
                         rows={4} 
                         className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none" 
                         placeholder="Type here"
+                        required
                     ></textarea>
                 </div>
 
@@ -192,6 +206,7 @@ const UpdateProduct = () => {
                         value={category} 
                         id="update-category" 
                         className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
+                        required
                     >
                         <option value="">Select Category</option>
                         {categories.map((item, index) => (

@@ -6,7 +6,11 @@ export const addProduct = async (req, res)=>{
     try {
         let productData = JSON.parse(req.body.productData)
 
-        const images = req.files
+        const images = req.files || []
+
+        if (!images || images.length === 0) {
+            return res.json({ success: false, message: "Please upload at least one product image" });
+        }
 
         let imagesUrl = await Promise.all(
             images.map(async (item)=>{

@@ -18,6 +18,17 @@ const AddProduct = () => {
         try {
             event.preventDefault();
 
+            const imageFiles = files.filter(Boolean);
+            if (imageFiles.length === 0) {
+                toast.error("Please upload at least one product image");
+                return;
+            }
+
+            if (!category) {
+                toast.error("Please select a category");
+                return;
+            }
+
             const productData = {
                 name,
                 description: description.split('\n'),
@@ -28,9 +39,9 @@ const AddProduct = () => {
 
             const formData = new FormData();
             formData.append('productData', JSON.stringify(productData));
-            for (let i = 0; i < files.length; i++) {
-                formData.append('images', files[i])
-            }
+            imageFiles.forEach((file) => {
+                formData.append('images', file);
+            });
 
             const {data} = await axios.post('/api/product/add', formData)
 
@@ -64,9 +75,11 @@ const AddProduct = () => {
                             <label key={index} htmlFor={`image${index}`}>
 
                                 <input onChange={(e)=>{
-                                    const updatedFiles = [...files];
-                                    updatedFiles[index] = e.target.files[0]
-                                    setFiles(updatedFiles)
+                                    if (e.target.files[0]) {
+                                        const updatedFiles = [...files];
+                                        updatedFiles[index] = e.target.files[0];
+                                        setFiles(updatedFiles);
+                                    }
                                 }}
                                 type="file" id={`image${index}`} hidden />
 
@@ -83,12 +96,12 @@ const AddProduct = () => {
                 <div className="flex flex-col gap-1 max-w-md">
                     <label className="text-base font-medium" htmlFor="product-description">Product Description</label>
                     <textarea onChange={(e)=> setDescription(e.target.value)} value={description}
-                     id="product-description" rows={4} className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none" placeholder="Type here"></textarea>
+                     id="product-description" rows={4} className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40 resize-none" placeholder="Type here" required></textarea>
                 </div>
                 <div className="w-full flex flex-col gap-1">
                     <label className="text-base font-medium" htmlFor="category">Category</label>
                     <select onChange={(e)=> setCategory(e.target.value)} value={category} 
-                    id="category" className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40">
+                    id="category" className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40" required>
                         <option value="">Select Category</option>
                         {categories.map((item, index)=>(
                             <option key={index} value={item.path}>{item.path}</option>
