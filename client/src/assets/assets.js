@@ -151,12 +151,6 @@ export const footerLinks = [
     links: [
       { text: "Home", url: "/" },
       { text: "All Products", url: "/products" },
-      { text: "Contact Us", url: "/contact" },
-    ],
-  },
-  {
-    title: "Need help?",
-    links: [
       { text: "Track your Order", url: "/my-orders" },
       { text: "Contact Us", url: "/contact" },
     ],

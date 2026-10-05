@@ -12,7 +12,7 @@ const Footer = () => {
                         We deliver fresh groceries and snacks straight to your door,trusted by thousands,we aim to make your shopping experiance simple and affordable.
                     </p>
                 </div>
-                <div className="flex flex-wrap justify-between w-full md:w-[45%] gap-5">
+                <div className="flex flex-wrap justify-between w-full md:w-[35%] gap-8">
                     {footerLinks.map((section, index) => (
                         <div key={index}>
                             <h3 className="font-semibold text-base text-gray-900 md:mb-5 mb-2">{section.title}</h3>
