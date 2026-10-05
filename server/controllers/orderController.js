@@ -255,6 +255,7 @@ export const cancelOrder = async (req, res) => {
             return res.json({ success: false, message: "Order is already cancelled" });
         }
 
+        const previousAmount = order.amount;
         order.status = "Cancelled";
         order.items.forEach(item => {
             item.status = "Cancelled";
@@ -265,7 +266,13 @@ export const cancelOrder = async (req, res) => {
         }
 
         await order.save();
-        return res.json({ success: true, message: "Entire order cancelled successfully" });
+
+        let message = "Order cancelled successfully!";
+        if (order.paymentType === "Online" && order.isPaid) {
+            message = `Order cancelled successfully! Full refund of ₹${previousAmount} initiated to your original payment method.`;
+        }
+
+        return res.json({ success: true, message });
     } catch (error) {
         return res.json({ success: false, message: error.message });
     }
@@ -298,6 +305,7 @@ export const cancelOrderItem = async (req, res) => {
             return res.json({ success: false, message: "Order is already cancelled" });
         }
 
+        const previousAmount = order.amount;
         let itemsUpdatedCount = 0;
 
         order.items.forEach(item => {
@@ -343,9 +351,27 @@ export const cancelOrderItem = async (req, res) => {
         }
 
         await order.save();
+
+        const refundAmount = Math.max(0, previousAmount - order.amount);
+
+        let message = "";
+        if (order.paymentType === "Online" && order.isPaid) {
+            if (activeItems.length === 0) {
+                message = `Order cancelled successfully! Full refund of ₹${previousAmount} initiated to your original payment method.`;
+            } else {
+                message = `Item(s) cancelled successfully! Refund of ₹${refundAmount} initiated to your original payment method (3-5 business days).`;
+            }
+        } else {
+            if (activeItems.length === 0) {
+                message = "Order cancelled successfully!";
+            } else {
+                message = `Item(s) cancelled successfully! Your updated COD payable amount is ₹${order.amount}.`;
+            }
+        }
+
         return res.json({ 
             success: true, 
-            message: `${itemsUpdatedCount} item(s) cancelled successfully`
+            message
         });
     } catch (error) {
         return res.json({ success: false, message: error.message });
