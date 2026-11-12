@@ -78,6 +78,10 @@ const Orders = () => {
     const cancelledOrdersCount = orders.filter(order => 
         order.status === 'Cancelled' || (order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'))
     ).length;
+    const inProgressOrdersCount = orders.filter(order => {
+        const isCancelled = order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'));
+        return order.status !== 'Delivered' && !isCancelled;
+    }).length;
 
     // Total earnings from Delivered or Paid orders (excluding cancelled orders)
     const totalEarnings = orders
@@ -101,6 +105,9 @@ const Orders = () => {
         if (statusFilter === 'Delivered') matchesStatus = order.status === 'Delivered';
         else if (statusFilter === 'Cancelled') {
             matchesStatus = order.status === 'Cancelled' || (order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'));
+        } else if (statusFilter === 'In Progress') {
+            const isCancelled = order.status === 'Cancelled' || (order.items && order.items.length > 0 && order.items.every(i => (i.status || order.status) === 'Cancelled'));
+            matchesStatus = order.status !== 'Delivered' && !isCancelled;
         } else if (statusFilter !== 'All') {
             matchesStatus = order.status === statusFilter;
         }
@@ -130,12 +137,12 @@ const Orders = () => {
             <div className="md:p-10 p-4 space-y-4">
                 
                 {/* Summary Dashboard Cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 max-w-5xl">
                     <div 
                         onClick={() => setStatusFilter('All')} 
-                        className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'All' ? 'ring-2 ring-blue-500 border-blue-400' : 'border-gray-200 hover:border-gray-300'}`}
+                        className={`bg-white p-3.5 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'All' ? 'ring-2 ring-blue-500 border-blue-400' : 'border-gray-200 hover:border-gray-300'}`}
                     >
-                        <div className="p-3 bg-blue-50 text-blue-600 rounded-lg font-bold text-xl">
+                        <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg font-bold text-xl">
                             📦
                         </div>
                         <div>
@@ -145,10 +152,23 @@ const Orders = () => {
                     </div>
 
                     <div 
-                        onClick={() => setStatusFilter('Delivered')} 
-                        className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'Delivered' ? 'ring-2 ring-green-500 border-green-400' : 'border-gray-200 hover:border-gray-300'}`}
+                        onClick={() => setStatusFilter('In Progress')} 
+                        className={`bg-white p-3.5 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'In Progress' ? 'ring-2 ring-amber-500 border-amber-400' : 'border-gray-200 hover:border-gray-300'}`}
                     >
-                        <div className="p-3 bg-green-50 text-green-600 rounded-lg font-bold text-xl">
+                        <div className="p-2.5 bg-amber-50 text-amber-600 rounded-lg font-bold text-xl">
+                            ⏳
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 font-medium">In Progress</p>
+                            <p className="text-xl font-bold text-amber-600">{inProgressOrdersCount}</p>
+                        </div>
+                    </div>
+
+                    <div 
+                        onClick={() => setStatusFilter('Delivered')} 
+                        className={`bg-white p-3.5 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'Delivered' ? 'ring-2 ring-green-500 border-green-400' : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                        <div className="p-2.5 bg-green-50 text-green-600 rounded-lg font-bold text-xl">
                             ✅
                         </div>
                         <div>
@@ -159,9 +179,9 @@ const Orders = () => {
 
                     <div 
                         onClick={() => setStatusFilter('Cancelled')} 
-                        className={`bg-white p-4 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'Cancelled' ? 'ring-2 ring-red-500 border-red-400' : 'border-gray-200 hover:border-gray-300'}`}
+                        className={`bg-white p-3.5 rounded-xl border shadow-sm flex items-center gap-3 cursor-pointer transition ${statusFilter === 'Cancelled' ? 'ring-2 ring-red-500 border-red-400' : 'border-gray-200 hover:border-gray-300'}`}
                     >
-                        <div className="p-3 bg-red-50 text-red-600 rounded-lg font-bold text-xl">
+                        <div className="p-2.5 bg-red-50 text-red-600 rounded-lg font-bold text-xl">
                             ❌
                         </div>
                         <div>
@@ -171,9 +191,9 @@ const Orders = () => {
                     </div>
 
                     <div 
-                        className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3"
+                        className="bg-white p-3.5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-3"
                     >
-                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg font-bold text-xl">
+                        <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-lg font-bold text-xl">
                             💰
                         </div>
                         <div>
@@ -183,7 +203,7 @@ const Orders = () => {
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between max-w-4xl pt-2 gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between max-w-5xl pt-2 gap-3">
                     <h2 className="text-lg font-medium">
                         Orders List {statusFilter !== 'All' && <span className="text-sm font-normal text-gray-500">({statusFilter})</span>}
                     </h2>
@@ -214,7 +234,7 @@ const Orders = () => {
                         const userOrderTotal = uid ? (userOrderCountMap[uid] || 1) : 1;
 
                         return (
-                        <div key={index} className="flex flex-col p-5 max-w-4xl rounded-md border border-gray-300 bg-white shadow-sm hover:shadow-md transition gap-4">
+                        <div key={index} className="flex flex-col p-5 max-w-5xl rounded-md border border-gray-300 bg-white shadow-sm hover:shadow-md transition gap-4">
                             
                             {/* Top Order Card Header */}
                             <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-gray-100 text-xs text-gray-500">
